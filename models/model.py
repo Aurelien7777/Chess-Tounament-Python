@@ -4,7 +4,7 @@ class Player:
         self.name = name
         self.last_name = last_name
         self.date_of_birth = date_of_birth
-        self.id = id
+        self.id = id #L'ID ne doit pas être généré
     
     def __repr__(self):
         return f"Player(nom={self.name},prenom={self.last_name} ,date de naissance={self.date_of_birth}, ID={self.id})"

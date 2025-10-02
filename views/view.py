@@ -11,27 +11,13 @@ def display_date_of_birth() -> str:
     date_of_birth = input("Entrer la date de naissance du joueur: ")
     return date_of_birth
 
-def display_id() -> str:
-    id = input("Entrer le ID du joueur: ")
-    return id
-
 def display_created_player(last_name, name):
     print(f"Création du joueur {last_name} {name} réussie")
+    
+def ask_player_creation():
+    response = input("Voulez-vous créer un nouveau joueur? Oui ou Non: ")
+    return response
 
-
-#CREATION MATCH
-def display_players():
-    players = []
-    print("Les joueurs participants au match sont ")
-    return players
-
-def display_score():
-    score = 0
-    print(score)
-    return score
-
-def display_player_add_to_match(list_player, random_choice_player):
-    print(f"Le joueur {list_player[random_choice_player]} a été ajouté au match")
 
 #AFFICHAGE DU MENU
 def display_menu():
