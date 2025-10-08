@@ -3,8 +3,8 @@
 def display_matchs():
     pass
 
-def display_name_round():
-    name_round = input("Entrer le nom du tour: ")
+def display_name_round(name_round):
+    print(name_round)
     return name_round
 
 def display_date_of_start():

@@ -1,7 +1,7 @@
 from views.view import display_name, display_menu, display_lastname, display_date_of_birth, display_created_player
 from models.model import Player
-from .model_tournament import Tournament
-from .view_tournament import display_name_of_tournament, display_place, display_date_of_start, display_date_of_end, display_description, display_actual_round
+from models.model_tournament import Tournament
+from views.view_tournament import display_name_of_tournament, display_place, display_date_of_start, display_date_of_end, display_description, display_actual_round
 from pathlib import Path
 import os
 import random
@@ -14,7 +14,7 @@ def create_tournament():
     date_of_start = display_date_of_start()
     date_of_end = display_date_of_end()
     description = display_description()
-    actual_round = display_actual_round()
+    actual_round = ""
     tournament = Tournament(name_of_tournament=name_of_tournament,place=place,date_of_start=date_of_start,date_of_end=date_of_end,
                             description=description, actual_round=actual_round, list_of_round=[], list_player_saved=[]) 
     return tournament
