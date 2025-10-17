@@ -2,56 +2,94 @@ import random
 import json
 from views.view import display_name, display_menu, display_lastname, display_date_of_birth, display_created_player, ask_player_creation
 from models.model import Player
+from models.model_match import Match
 from .controller_tournament import create_tournament
 from models.model_tournament import Tournament
-from .controller_match import manage_winner_match, create_match
-from models.model import Player
+from .controller_match import manage_winner_match, create_match, match_after_first_round, manage_winner_match_bis, classement
 from models.model_round import Round
 from pathlib import Path
 import os
 from .controller_round import start_round
 import datetime
+from tinydb import TinyDB, Query
+from tinydb.storages import JSONStorage
 
 
-#CREATION DE JOUEUR
+# CREATION DE JOUEUR
 def create_player():
-
+    list_number_for_id = ["0","1","2","3","4","5","6","7","8","9"]
+    list_letter_for_id = ["A","B","C","D","E","F","G","G","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
+    
     name = display_name()
     last_name = display_lastname()
     date_of_birth = display_date_of_birth() 
-    id = ""
+    list_for_id = random.sample(list_letter_for_id, k=2) + random.sample(list_number_for_id, k=5)
+    id = "".join(list_for_id)
     player = Player(name=name,date_of_birth=date_of_birth,last_name=last_name,id=id, score=0)
     display_created_player(name, last_name)
     
     return player
 
-#SAUVEGARDE DU JOUEUR DANS UN FICHIER JSON
-def save_players(players): # "players" contient la liste des joueurs qui vont être sauvegardés
+
+def save_players(players, data_base_players): # "players" contient la liste des joueurs qui vont être sauvegardés
     # sérialiser une **liste** complète (pas concaténer deux JSON)
-    data = []
-    for player in players: #Itération sur la liste contenant les infos des joueurs
-        print("Le joueur sauvegardé est:", player)
-        data_player = serializer(player) #Récupération et conversion des infos joueurs au format JSON
-        print("les données sauvegardées sont:", data_player)
-        data.append(data_player) #Ajout des infos joueurs à la liste
+    data_base_players = TinyDB(
+                        data_base_players,
+                        storage=JSONStorage,
+                        ensure_ascii=False, # garde les accents
+                        indent=2,
+                        encoding="utf-8") # indentations sur plusieurs lignes
     
-    
-    
-    if not os.path.exists("data_players.json"):
-        with open('data_players.json', 'w', encoding='utf-8') as f: #Création d'un fichier JSON 
-            json.dump(data, f, ensure_ascii=False, indent=2) #Ecriture dans le fichier
-    else: 
-        with open('data_players.json', 'a', encoding='utf-8') as f: #Création d'un fichier JSON 
-            json.dump(data, f, ensure_ascii=False, indent=2) #Ecriture dans le fichier
+    for player in players: # Itération sur la liste contenant les infos des joueurs
+        if player not in data_base_players.all() and player not in data_base_players.all():
+            data_player = serializer(player) # Récupération et conversion des infos joueurs au format JSON
+            data_base_players.insert(data_player)
+            print(f"Sauvegarde du joueur {player.name} {player.last_name} effectuée")
+        else:
+            print("Le joueur est déjà présent dans la base de donnée")
+        
+    return data_base_players
+
+
+def save_score(data_base_players, players):
+    db = TinyDB(
+        data_base_players,
+        storage=JSONStorage,
+        ensure_ascii=False,
+        indent=2,
+        encoding="utf-8"
+    )
+    request_player = Query() # L'objet utilisé pour créer les requêtes
+
+    for joueur in players:  # Parcours chaque joueur du tournoi
+        data_player = serializer(joueur)  # récupère les données joueurs dont le score actuel (modifié dans manage_winner_match)
+        
+        # Recherche le joueur dans la base par id 
+        request_id_player = (request_player.id == data_player["id"]) 
+        existing = db.get(request_id_player)
+
+
+        if existing:
+            db.update({"score": data_player["score"]}, request_id_player) # Accès à la clé score du dictionnaire correspondant à l'ID du joueur concerné
+            print(f"Score mis à jour pour {joueur.name} {joueur.last_name} : {joueur.score}")
+        else:
+            print(f"{joueur.name} {joueur.last_name} introuvable : pas de mise à jour")
+
+    db.close()
 
 
 
-#CONVERTISSEMENT D'UN OBJET PYTHON EN JSON
+
+def save_data(players):
+    data_base_tournament = TinyDB("data_base_tournament.json")
+    data_base_tournament.insert()
+
+
+# CONVERTISSEMENT D'UN OBJET PYTHON EN JSON
 def serializer(obj):
     """Convertit un objet Python en JSON"""
-    if isinstance(obj, Player): #Vérification que l'objet de classe crée "obj" est bien du même type que Player
+    if isinstance(obj, Player): # Vérification que l'objet de classe crée "obj" est bien du même type que Player
         data_player = {"name": obj.name, "last_name":obj.last_name, "date_of_birth": obj.date_of_birth, "id":obj.id, "score":obj.score}
-        print(f"Les données du joueur sont {data_player}")
         return data_player
     raise TypeError(f"Type non sérialisable: {type(obj)}")
 
@@ -63,38 +101,38 @@ def serializer(obj):
 
 #EXECUTION DU MENU PRINCIPAL
 def start_menu():
-    all_players = [] #Création d'une liste contenant les joueurs crées
+    all_players = [] # Création d'une liste contenant les joueurs crées
     
-    choice = int(display_menu()) #Récupération de la donnée entrée dans la fonction input de la fonction display_menu()
+    choice = int(display_menu()) # Récupération de la donnée entrée dans la fonction input de la fonction display_menu()
     if choice > 3 or choice < 1:
         print("ERREUR: Le choix doit être chiffre entre 1 et 3")
         try:
-            choice = int(display_menu()) #Conversion en INT 
+            choice = int(display_menu()) # Conversion en INT 
         except ValueError:
             print("ERREUR: Le choix doit être chiffre entre 1 et 3")
 
 
-    #CHOIX UTILISATEUR
+    # CHOIX UTILISATEUR
     
-    #PLAYER
+    # PLAYER
     if choice == 1:
 
         IsCreation = True
         while IsCreation:
-            player = create_player() #CREATION JOUEUR
+            player = create_player() # CREATION JOUEUR
             print("Le type du joueur crée est:", type(player))
             print()
             all_players.append(player)
             print("Le type du joueur présent dans la liste est:", type(all_players[0]))
-            save_players(all_players) #CREATION D'UN FICHIER JSON
+            save_players(all_players) # CREATION D'UN FICHIER JSON
             
-            #Démarrage de la boucle pour création de joueur
+            # Démarrage de la boucle pour création de joueur
             response = ask_player_creation()
             if response.lower() == "oui":
                 try:
-                    player = create_player() #CREATION JOUEUR
+                    player = create_player() # CREATION JOUEUR
                     all_players.append(player)
-                    save_players(all_players) #CREATION D'UN FICHIER JSON
+                    save_players(all_players) # CREATION D'UN FICHIER JSON
                 except TypeError:
                     print("ERREUR: La réponse ne peut être que Oui ou Non")
             else:
@@ -103,66 +141,179 @@ def start_menu():
             
         
     
-    #MATCH
+    # MATCH
     elif choice == 2:
-        #play_match = Match()
         while len(all_players) <= 1:
             player = create_player()
             all_players.append(player)
         else:
-            single_match = create_match(all_players) #CREATION MATCH
+            single_match = create_match(all_players) # CREATION MATCH
             winner_match = manage_winner_match(single_match)
-            
-    #TOURNAMENT
+
+
+
+    # TOURNAMENT
     elif choice == 3:
-        #CREATION DU TOURNOI
+        # CREATION DU TOURNOI
         tournament = create_tournament() 
-        number_player_in_tournamment = int(input("Combien de joueurs participe au tournoi? ")) #Nombre de joueurs participant au tournoi
+        number_player_in_tournamment = int(input("Combien de joueurs participe au tournoi? ")) # Nombre de joueurs participant au tournoi
         
-        #CREATION DES JOUEURS DU TOURNOI 
+        # CREATION DES JOUEURS DU TOURNOI 
         for player in range(number_player_in_tournamment):
             player = create_player()
             print()
-            all_players.append(player) #Enregistrement des joueurs dans la liste des joueurs sauvegardés
-        save_players(all_players) #Enregistrement des joueurs dans le fichier JSON
-        print()
+            all_players.append(player) # Enregistrement des joueurs dans la liste des joueurs sauvegardés
         
-        tournament.list_player_saved = all_players #Utilisation de la variable de l'objet Tournament
-        number_of_match = int(number_player_in_tournamment / 2) #Détermination du nombre de match
+        tournament.list_player_saved = all_players # Utilisation de la variable de l'objet Tournament / liste des joueurs enregistrés
+        data_base_players = save_players(tournament.list_player_saved, "data_base_players.json") # Enregistrement des joueurs dans le fichier JSON
+        number_of_match = len(data_base_players) # Détermination du nombre de match en fonction du nombre de joueur divisé par 2
+        round_match_list = [] # Création d'une liste contenant l'ensemble des matchs par round
         
-        round_match_list = [] #Création d'une liste contenant l'ensemble des matchs par round
-        winner_list = [] #Création d'une liste contenant l'ensemble des gagnants des matchs
-        short_lived_list = all_players.copy()
-        #Réalisation des matchs pour le round 1 
         
-        for tour in range(tournament.number_of_round): #Execution des 4 rounds
+        
+
+        # REALISATION DES MATCHS POUR LE TOUR 1 
+        for tour in range(1): #Execution du premier round 
+
             Round.name_round = f"Round {tour+1}" #Nom du round
             Round.date_and_hour_of_start = datetime.datetime.now()
             tournament.actual_round = Round.name_round
             print(f"Début du {Round.name_round} à {Round.date_and_hour_of_start}")
             print()
-            short_lived_list = all_players.copy()
-            round_match_list = [] #Création d'une liste contenant l'ensemble des matchs par round
+            short_lived_list = all_players.copy() # Copie de la liste pour la réutiliser dans la création des matchs
+            round_match_list = [] # Création d'une liste contenant l'ensemble des matchs par round
+            matches_played = [] #Liste des matchs joués par round
             
-            for match in range(number_of_match):
-                match = create_match(short_lived_list) #Sélection aléatoire de 2 joueurs dans la liste "all_players " qui contient tous les joueurs
+
+            winner_list = [] # Création d'une liste contenant l'ensemble des gagnants des matchs
+            draw_list = [] # Création d'une liste contenant l'ensemble des joueurs ayant fait match nul
+            looser_list = [] # Création d'une liste contenant l'ensemble des perdants des matchs
+            
+
+            # LANCEMENT DES MATCHS DU ROUND
+            for match in range(number_of_match // 2):
+
+                match = create_match(short_lived_list, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "all_players " qui contient tous les joueurs
+                if match is None:
+                    print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
+                    break
                 unique_match = ([match.players[0], match.score], [match.players[1], match.score])
-                round_match_list.append(unique_match) #Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
-                print()
+                round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
                 print("Le match est:", unique_match)
-                winner = manage_winner_match(match.players) #Décide du vainqueur du match
                 print()
-                winner_list.append(winner) #Ajout du vainqueur dans une liste
-                print()
+
+
+                # GESTION DES GAGNANT/PERDANT/MATCH NUL
+                winner = manage_winner_match_bis(match.players) # Décide du vainqueur d'un match à travers la liste "match.players"
                 
+                if type(winner) == list:
+                    draw_list.append(winner[0])
+                    draw_list.append(winner[1])
+                
+                else:
+                    winner_list.append(winner[0]) # Ajout du vainqueur dans une liste
+                    looser_list.append(winner[1]) # Ajout du perdant dans la liste
+                print()
+
+                save_score("data_base_players.json", all_players)
+
             Round.date_and_hour_of_end = datetime.datetime.now()
             print(f"Fin du {tournament.actual_round} à {Round.date_and_hour_of_end}")
-            #print("Voici les vainqueurs des différentes rencontres: ", winner_list)
+            print()
+        tournament.list_of_round = round_match_list # liste des tours 
+
+        classement_after_round = classement(winner_list, draw_list, looser_list) # Etablissement du classement après le premier round
+        print()
+        print()
+        print()
+
+
+        # REALISATION DES MATCHS POUR LES TOURS RESTANTS
+        for tour in range(tournament.number_of_round - 1): #Execution du second round 
+
+            Round.name_round = f"Round {tour+1}" #Nom du round
+            Round.date_and_hour_of_start = datetime.datetime.now()
+            tournament.actual_round = Round.name_round
+            print(f"Début du {Round.name_round} à {Round.date_and_hour_of_start}")
+            print()
+            short_lived_list = all_players.copy() # Copie de la liste pour la réutiliser dans la création des matchs
+            round_match_list = [] # Création d'une liste contenant l'ensemble des matchs par round
+            matches_played = [] #Liste des matchs joués par round
+
+            winner_list = [] # Création d'une liste contenant l'ensemble des gagnants des matchs
+            draw_list = [] # Création d'une liste contenant l'ensemble des joueurs ayant fait match nul
+            looser_list = [] # Création d'une liste contenant l'ensemble des perdants des matchs
             
-            
+            for match in range(number_of_match // 2):
+                
+                # MATCHS DES GAGNANTS
+                print("MATCHS APRES LE PREMIER TOUR")
+                match_after_round = match_after_first_round(classement_after_round, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "winner_list" qui contient tous les joueurs
+                if match_after_round is None:
+                    print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
+                else:
+                    unique_match = ([match_after_round.players[0], match_after_round.score], [match_after_round.players[1], match_after_round.score])
+                    round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
+                    print("Le match est:", unique_match)
+                    
+                                    # GESTION DES GAGNANT/PERDANT/MATCH NUL
+                    winner = manage_winner_match_bis(match_after_round.players) # Décide du vainqueur d'un match à travers la liste "match.players"
+                    
+                    if type(winner) == list:
+                        draw_list.append(winner[0])
+                        draw_list.append(winner[1])
+                    
+                    else:
+                        winner_list.append(winner[0]) # Ajout du vainqueur dans une liste
+                        looser_list.append(winner[1]) # Ajout du perdant dans la liste
+                print()
+
+
+                save_score("data_base_players.json", all_players)
+            Round.date_and_hour_of_end = datetime.datetime.now()
+            print(f"Fin du {tournament.actual_round} à {Round.date_and_hour_of_end}")
+            print()
+        tournament.list_of_round = round_match_list # liste des tours 
+        
+        classement_after_round = classement(winner_list, draw_list, looser_list) # Etablissement du classement après le premier round
+        
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+"""#MATCHS DES MATCHS NULS
+print("#MATCHS DES MATCHS NULS")
+print("Liste des matchs nuls",draw_list)
+print()
+match_draw = match_after_first_round(draw_list, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "draw_list" qui contient tous les joueurs
+print("Match des matchs nuls:", match_draw)
+if match_draw is None:
+    print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
+else:
+    unique_match = ([match_draw.players[0], match_draw.score], [match_draw.players[1], match_draw.score])
+    round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
+    print("Le match est:", unique_match)
+print()
+
+
+#MATCH DES PERDANTS
+print("#MATCHS DES PERDANTS")
+match_looser = match_after_first_round(looser_list, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "looser_list" qui contient tous les joueurs
+if match_looser is None:
+    print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
+else:
+    unique_match = ([match_looser.players[0], match_looser.score], [match_looser.players[1], match_looser.score])
+    round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
+    print("Le match est:", unique_match)
+print()"""
 

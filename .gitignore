@@ -3,3 +3,6 @@
 /Décomposition spécification technique.txt
 /MENTORAT 26 SEPTEMBRE.txt
 /venv
+*.pyc
+/MENTORAT 10 OCTOBRE.txt
+/data_base_players.json
