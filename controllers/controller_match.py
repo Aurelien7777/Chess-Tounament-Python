@@ -39,74 +39,64 @@ def create_match(list_player, matches_played):
         return None
 
 
+        
 def match_after_first_round(classement_after_round, matches_played):
-    
-    print("La liste des joueurs classé par point est:\n", classement_after_round)
-    list_match_player = [] #Liste des joueurs jouant un match
-    print("Nombre d'élément dans la liste classement:",len(classement_after_round))
+    # print("La liste des joueurs classé par point qui va être utilisé pour les matchs est:\n")
+    compteur = 1
+    for classement in classement_after_round:
+        # print(f"No.{compteur}   {classement.name} {classement.last_name} score : {classement.score} ID : {classement.id}")
+        compteur += 1
     print()
+
+    # Pas assez de joueurs
     if len(classement_after_round) < 2:
         return None
-    
-    for i in range(2):
-        if len(classement_after_round) < 2:
-            print("Fin des matchs")
-            break  # sécurité pour éviter "empty range in randrange"
-        print("Nombre d'élément dans la liste classement:",len(classement_after_round))
-        print()
-        chosen_player = classement_after_round[i] # Joueur choisi
-        
-        if chosen_player not in list_match_player:
-            list_match_player.append(chosen_player)
-            classement_after_round.remove(chosen_player)
-            
-    if len(list_match_player) == 2:
-        # Crée un identifiant unique du match (ordre neutre)
-        match_key = {list_match_player[0].id, list_match_player[1].id}
 
-        # Si ce match a déjà été joué = on en génère un autre
-        if match_key in matches_played:
-            return create_match(classement_after_round, matches_played)
-        else:
+    # On prend le meilleur disponible (index 0)
+    p1 = classement_after_round[0]
+
+    # On cherche le meilleur partenaire possible (index 1, puis 2, etc.)
+    k = 1
+    
+    while k < len(classement_after_round):
+        p2 = classement_after_round[k]
+        match_key = {p1.id, p2.id}
+
+        # Si la paire n'a jamais joué, on VALIDE et on enlève les deux
+        if match_key not in matches_played:
             matches_played.append(match_key)
-            return Match(players=list_match_player, score=0)
-    else:
-        return None
-    
-def classement(winner_list, draw_list, looser_list):
-    
-    classement_after_match = []
-    for winner in winner_list:
-        classement_after_match.append(winner)
-        
-    for draw in draw_list:
-        classement_after_match.append(draw)
+            # retirer p2 AVANT p1 (pour ne pas décaler l'index 0)
+            classement_after_round.pop(k)
+            classement_after_round.pop(0)
+            return Match(players=[p1, p2], score=0)
 
-    for looser in looser_list:
-        classement_after_match.append(looser)
+        # Sinon, on tente le suivant
+        k += 1
 
-    for classement in classement_after_match:
-        print(classement)
-        
-    return classement_after_match
+    # Si p1 n’a aucun partenaire disponible (tous déjà joués), on l’enlève et on retente
+    classement_after_round.pop(0)
+    return match_after_first_round(classement_after_round, matches_played)
+
+
+
     
 
-
+#GESTION DES RESULTATS DES MATCHS 
 def manage_winner_match_bis(list_match_player):
     
     winner = random.randint(0, 2)
-    print("Le chiffre choisi est:", winner)
+    # print("Le chiffre choisi est:", winner)
     print()
     
     if winner == 0: #Si le chiffre choisi est inférieur à 1 soit est égal à 0 
 
-        print(f"le perdant est: {list_match_player[1]}\nle gagnant est {list_match_player[0]}")
+        # print(f"le perdant est: {list_match_player[1]}\nle gagnant est {list_match_player[0]}")
         list_match_player[0].score += 1
         return list_match_player[winner], list_match_player[1]
     
     elif winner == 1:
 
-        print(f"le perdant est: {list_match_player[0]}\nle gagnant est {list_match_player[1]}")
+        # print(f"le perdant est: {list_match_player[0]}\nle gagnant est {list_match_player[1]}")
         list_match_player[1].score += 1
         return list_match_player[winner], list_match_player[0]
     
@@ -117,45 +107,79 @@ def manage_winner_match_bis(list_match_player):
         list_match_player[1].score +=0.5
         
         draw_list.append(list_match_player[0])
-        draw_list.append(list_match_player[0])
-        print("Match nul") #Chaque joueur reçoit 0,5 point si le match se termine par un match nul.
+        draw_list.append(list_match_player[1])
+        # print("Match nul") #Chaque joueur reçoit 0,5 point si le match se termine par un match nul.
         print(draw_list)
         return draw_list
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-#GESTION DE LA CREATION DE MATCH
-def manage_winner_match(list_match_player):
+#GESTION DU CLASSEMENT DES JOUEURS
+def classement(winner_list, draw_list, looser_list):
     
-    winner = random.randint(0, 2)
-    print("Le chiffre choisi est:", winner)
+    classement_after_match = []
+    for winner in winner_list:
+        classement_after_match.append(winner)
     print()
-    
-        
-    if winner == 0: #Si le chiffre choisi est inférieur à 1 soit est égal à 0 
-        print(f"le perdant est: {list_match_player[1]}\n le gagnant est {list_match_player[0]}")
-        list_match_player[0].score += 1
-        return list_match_player[winner]#, list_match_player[1]
-    
-    elif winner == 1:
-        print(f"le perdant est: {list_match_player[0]}\n le gagnant est {list_match_player[1]}")
-        list_match_player[1].score += 1
-        return list_match_player[winner]#, list_match_player[0]
-    
-    elif winner == 2 : #Si le chiffre choisi est supérieur à 1 = Match nul
-        list_match_player[0].score +=0.5
-        list_match_player[1].score +=0.5
-        print("Match nul") #Chaque joueur reçoit 0,5 point si le match se termine par un match nul.
+    for draw in draw_list:
+        classement_after_match.append(draw)
+    print()
+    for looser in looser_list:
+        classement_after_match.append(looser)
+    print()
 
-        return list_match_player[0]#, list_match_player[1]
+    #  initialisation score max et score min à partir du 1er joueur si la liste n'est pas vide
+    if classement_after_match:
+        score_max = classement_after_match[0].score
+        score_min = classement_after_match[0].score
+    else:
+        score_max = 0
+        score_min = 0
+
+    itération = 0
+    while itération < len(classement_after_match):
+        player_classement = classement_after_match[itération]
+
+        # mise à jour des score max et min 
+        if player_classement.score >= score_max:
+            score_max = player_classement.score
+        elif player_classement.score <= score_min:
+            score_min = player_classement.score
+
+        # insertion triée (remontée du joueur si besoin)
+        if itération > 0:
+            joueur = itération
+            while joueur > 0 and classement_after_match[joueur].score > classement_after_match[joueur-1].score:
+                temporaire = classement_after_match[joueur-1]
+                classement_after_match[joueur-1] = classement_after_match[joueur]
+                classement_after_match[joueur] = temporaire
+                joueur -= 1
+
+        itération += 1
+
+    # supprimer les doublons par id (on garde la 1re occurrence) 
+    current_idx = 0
+    while current_idx < len(classement_after_match):
+        next_idx = current_idx + 1
+        while next_idx < len(classement_after_match):
+            if classement_after_match[next_idx].id == classement_after_match[current_idx].id:
+                classement_after_match.pop(next_idx)
+            else:
+                next_idx += 1
+        current_idx += 1
+
+    print()
+    compteur = 1
+    for player_classement_final in classement_after_match:
+        print(f"No.{compteur}   {player_classement_final.name} {player_classement_final.last_name} score : {player_classement_final.score} ID : {player_classement_final.id}")
+        compteur += 1
+
+    return classement_after_match
+
+
+
+def choice_white_or_black(list_match_player):
+    player_start = random.randint(0, 1)
+    print(f"Le joueur jouant en blanc est {list_match_player[player_start].name } {list_match_player[player_start].last_name }")
+    return player_start

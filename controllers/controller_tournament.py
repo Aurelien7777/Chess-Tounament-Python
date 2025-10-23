@@ -19,8 +19,19 @@ def create_tournament():
                             description=description, actual_round=actual_round, list_of_round=[], list_player_saved=[]) 
     return tournament
 
-def score_player_after_match():
-    pass
+def serializer_tournament(obj):
+    """Convertit un objet Python en JSON"""
+    if isinstance(obj, Tournament): # Vérification que l'objet de classe crée "obj" est bien du même type que Tournament
+        data_tournament = {"Nom du tournoi": obj.name_of_tournament, 
+                        "Lieu du tournoi":obj.place, 
+                        "Date de début du tournoi": obj.date_of_start,
+                        "Date de fin du tournoi":obj.date_of_end,
+                        "Nombre de round":obj.number_of_round,
+                        "Informations des tours":obj.list_of_round,
+                        "Liste des joueurs":obj.list_player_saved,
+                        "Description":obj.description}
+        return data_tournament
+    raise TypeError(f"Type non sérialisable: {type(obj)}")
 
 
 

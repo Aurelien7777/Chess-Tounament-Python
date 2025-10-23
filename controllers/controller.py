@@ -3,9 +3,9 @@ import json
 from views.view import display_name, display_menu, display_lastname, display_date_of_birth, display_created_player, ask_player_creation
 from models.model import Player
 from models.model_match import Match
-from .controller_tournament import create_tournament
+from .controller_tournament import create_tournament, serializer_tournament
 from models.model_tournament import Tournament
-from .controller_match import manage_winner_match, create_match, match_after_first_round, manage_winner_match_bis, classement
+from .controller_match import create_match, match_after_first_round, manage_winner_match_bis, classement, choice_white_or_black
 from models.model_round import Round
 from pathlib import Path
 import os
@@ -32,7 +32,7 @@ def create_player():
 
 
 def save_players(players, data_base_players): # "players" contient la liste des joueurs qui vont être sauvegardés
-    # sérialiser une **liste** complète (pas concaténer deux JSON)
+    # sérialiser une liste complète (pas concaténer deux JSON)
     data_base_players = TinyDB(
                         data_base_players,
                         storage=JSONStorage,
@@ -80,9 +80,20 @@ def save_score(data_base_players, players):
 
 
 
-def save_data(players):
-    data_base_tournament = TinyDB("data_base_tournament.json")
-    data_base_tournament.insert()
+def save_data(data_tournament, data_base_tournament):
+    db = TinyDB(
+        data_base_tournament,
+        storage=JSONStorage,
+        ensure_ascii=False,
+        indent=2,
+        encoding="utf-8"
+    )
+    
+    data = serializer_tournament(data_tournament)
+    db.insert(data)
+    print(f"Sauvegarde du joueur des données du tournoi: {data}")
+    
+    return data_base_tournament
 
 
 # CONVERTISSEMENT D'UN OBJET PYTHON EN JSON
@@ -148,7 +159,7 @@ def start_menu():
             all_players.append(player)
         else:
             single_match = create_match(all_players) # CREATION MATCH
-            winner_match = manage_winner_match(single_match)
+            winner_match = manage_winner_match_bis(single_match)
 
 
 
@@ -156,6 +167,7 @@ def start_menu():
     elif choice == 3:
         # CREATION DU TOURNOI
         tournament = create_tournament() 
+        data_base_tournament = save_data(tournament, "data_base_tournament.json") # Enregistrement des données du tournoi
         number_player_in_tournamment = int(input("Combien de joueurs participe au tournoi? ")) # Nombre de joueurs participant au tournoi
         
         # CREATION DES JOUEURS DU TOURNOI 
@@ -164,7 +176,7 @@ def start_menu():
             print()
             all_players.append(player) # Enregistrement des joueurs dans la liste des joueurs sauvegardés
         
-        tournament.list_player_saved = all_players # Utilisation de la variable de l'objet Tournament / liste des joueurs enregistrés
+        tournament.list_player_saved = all_players.sort() # Utilisation de la variable de l'objet Tournament / liste des joueurs enregistrés
         data_base_players = save_players(tournament.list_player_saved, "data_base_players.json") # Enregistrement des joueurs dans le fichier JSON
         number_of_match = len(data_base_players) # Détermination du nombre de match en fonction du nombre de joueur divisé par 2
         round_match_list = [] # Création d'une liste contenant l'ensemble des matchs par round
@@ -198,8 +210,10 @@ def start_menu():
                     print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
                     break
                 unique_match = ([match.players[0], match.score], [match.players[1], match.score])
+                choice_white_or_black(match.players)
                 round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
-                print("Le match est:", unique_match)
+                # print("Le match est:", unique_match)
+                print(f"Le match est {match.players[0].name} {match.players[0].last_name} contre {match.players[1].name} {match.players[1].last_name}")
                 print()
 
 
@@ -216,14 +230,14 @@ def start_menu():
                 print()
 
                 save_score("data_base_players.json", all_players)
-
+                print()
+            print()
             Round.date_and_hour_of_end = datetime.datetime.now()
             print(f"Fin du {tournament.actual_round} à {Round.date_and_hour_of_end}")
             print()
         tournament.list_of_round = round_match_list # liste des tours 
-
+        print("CLASSEMENT APRES ROUND 1")
         classement_after_round = classement(winner_list, draw_list, looser_list) # Etablissement du classement après le premier round
-        print()
         print()
         print()
 
@@ -243,26 +257,27 @@ def start_menu():
             winner_list = [] # Création d'une liste contenant l'ensemble des gagnants des matchs
             draw_list = [] # Création d'une liste contenant l'ensemble des joueurs ayant fait match nul
             looser_list = [] # Création d'une liste contenant l'ensemble des perdants des matchs
+            classement_after_round_bis = classement_after_round.copy()
             
             for match in range(number_of_match // 2):
                 
                 # MATCHS DES GAGNANTS
                 print("MATCHS APRES LE PREMIER TOUR")
-                match_after_round = match_after_first_round(classement_after_round, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "winner_list" qui contient tous les joueurs
+                match_after_round = match_after_first_round(classement_after_round_bis, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "classement_after_round_bis" qui contient tous les joueurs
                 if match_after_round is None:
                     print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
                 else:
                     unique_match = ([match_after_round.players[0], match_after_round.score], [match_after_round.players[1], match_after_round.score])
+                    choice_white_or_black(match_after_round.players)
                     round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
-                    print("Le match est:", unique_match)
+                    # print("Le match est:", unique_match)
                     
-                                    # GESTION DES GAGNANT/PERDANT/MATCH NUL
+                # GESTION DES GAGNANT/PERDANT/MATCH NUL
                     winner = manage_winner_match_bis(match_after_round.players) # Décide du vainqueur d'un match à travers la liste "match.players"
-                    
                     if type(winner) == list:
                         draw_list.append(winner[0])
                         draw_list.append(winner[1])
-                    
+
                     else:
                         winner_list.append(winner[0]) # Ajout du vainqueur dans une liste
                         looser_list.append(winner[1]) # Ajout du perdant dans la liste
@@ -270,13 +285,14 @@ def start_menu():
 
 
                 save_score("data_base_players.json", all_players)
+            print()
             Round.date_and_hour_of_end = datetime.datetime.now()
             print(f"Fin du {tournament.actual_round} à {Round.date_and_hour_of_end}")
             print()
         tournament.list_of_round = round_match_list # liste des tours 
         
+        print(f"CLASSEMENT APRES ROUND {Round.name_round}:\n")
         classement_after_round = classement(winner_list, draw_list, looser_list) # Etablissement du classement après le premier round
-        
 
 
 
@@ -284,36 +300,4 @@ def start_menu():
 
 
 
-
-
-
-
-
-
-
-"""#MATCHS DES MATCHS NULS
-print("#MATCHS DES MATCHS NULS")
-print("Liste des matchs nuls",draw_list)
-print()
-match_draw = match_after_first_round(draw_list, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "draw_list" qui contient tous les joueurs
-print("Match des matchs nuls:", match_draw)
-if match_draw is None:
-    print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
-else:
-    unique_match = ([match_draw.players[0], match_draw.score], [match_draw.players[1], match_draw.score])
-    round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
-    print("Le match est:", unique_match)
-print()
-
-
-#MATCH DES PERDANTS
-print("#MATCHS DES PERDANTS")
-match_looser = match_after_first_round(looser_list, matches_played) # Sélection aléatoire de 2 joueurs dans la copie de la liste "looser_list" qui contient tous les joueurs
-if match_looser is None:
-    print("Aucun match possible (plus assez de joueurs ou plus de paires disponibles).")
-else:
-    unique_match = ([match_looser.players[0], match_looser.score], [match_looser.players[1], match_looser.score])
-    round_match_list.append(unique_match) # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
-    print("Le match est:", unique_match)
-print()"""
 
