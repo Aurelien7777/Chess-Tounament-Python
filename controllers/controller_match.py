@@ -84,7 +84,8 @@ def match_after_first_round(classement_after_round, matches_played):
 #GESTION DES RESULTATS DES MATCHS 
 def manage_winner_match_bis(list_match_player):
     
-    winner = random.randint(0, 2)
+    # winner = random.randint(0, 2)
+    winner = int(input("Le vainqueur du match est: "))
     # print("Le chiffre choisi est:", winner)
     print()
     
@@ -183,3 +184,13 @@ def choice_white_or_black(list_match_player):
     player_start = random.randint(0, 1)
     print(f"Le joueur jouant en blanc est {list_match_player[player_start].name } {list_match_player[player_start].last_name }")
     return player_start
+
+
+
+def serializer_match(obj):
+    """Convertit un objet Python en JSON"""
+    if isinstance(obj, Match): # Vérification que l'objet de classe crée "obj" est bien du même type que Tournament
+        data_match = {"Matchs": obj.players, 
+                        "Score":obj.score}
+        return data_match
+    raise TypeError(f"Type non sérialisable: {type(obj)}")
