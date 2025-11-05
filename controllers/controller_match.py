@@ -27,55 +27,83 @@ def create_match(list_player, matches_played):
             
     if len(list_match_player) == 2:
         # Crée un identifiant unique du match (ordre neutre)
-        match_key = {list_match_player[0].id, list_match_player[1].id}
-
-        # Si ce match a déjà été joué = on en génère un autre
+        match_key = tuple(sorted((list_match_player[0].id, list_match_player[1].id)))
+        
         if match_key in matches_played:
             return create_match(list_player, matches_played)
         else:
             matches_played.append(match_key)
-            return Match(players=list_match_player, score=0)
+            return Match(players=list_match_player, score=[0, 0])   # ✅ retour ajouté
+
     else:
         return None
 
 
         
-def match_after_first_round(classement_after_round, matches_played):
-    # print("La liste des joueurs classé par point qui va être utilisé pour les matchs est:\n")
-    compteur = 1
-    for classement in classement_after_round:
-        # print(f"No.{compteur}   {classement.name} {classement.last_name} score : {classement.score} ID : {classement.id}")
-        compteur += 1
-    print()
+"""def match_after_first_round(classement_after_round, matches_played_round):
 
     # Pas assez de joueurs
     if len(classement_after_round) < 2:
         return None
 
     # On prend le meilleur disponible (index 0)
-    p1 = classement_after_round[0]
+    premier_du_classement = classement_after_round[0]
 
     # On cherche le meilleur partenaire possible (index 1, puis 2, etc.)
-    k = 1
+    index_de_recherche_du_deuxieme_meilleur = 1
     
-    while k < len(classement_after_round):
-        p2 = classement_after_round[k]
-        match_key = {p1.id, p2.id}
-
+    while index_de_recherche_du_deuxieme_meilleur < len(classement_after_round):
+        deuxieme_meilleur = classement_after_round[index_de_recherche_du_deuxieme_meilleur]
+        match = tuple(sorted((premier_du_classement.id, deuxieme_meilleur.id)))
+    
         # Si la paire n'a jamais joué, on VALIDE et on enlève les deux
-        if match_key not in matches_played:
-            matches_played.append(match_key)
-            # retirer p2 AVANT p1 (pour ne pas décaler l'index 0)
-            classement_after_round.pop(k)
+        if match not in matches_played_round:
+            # on verrouille la paire pour CE round
+            matches_played_round.append(match)
+
+            # on retire les deux joueurs du classement pour ce round
+            classement_after_round.pop(index_de_recherche_du_deuxieme_meilleur)
             classement_after_round.pop(0)
-            return Match(players=[p1, p2], score=0)
+
+            return Match(players=[premier_du_classement, deuxieme_meilleur], score=[0, 0])
 
         # Sinon, on tente le suivant
-        k += 1
+        index_de_recherche_du_deuxieme_meilleur += 1
 
-    # Si p1 n’a aucun partenaire disponible (tous déjà joués), on l’enlève et on retente
+    # Si le premier du classement n’a aucun partenaire disponible (tous déjà joués), on l’enlève et on retente
     classement_after_round.pop(0)
-    return match_after_first_round(classement_after_round, matches_played)
+    return match_after_first_round(classement_after_round, matches_played_round)"""
+
+
+
+def match_after_first_round(classement_after_round, matches_played_round):
+    """
+    Sélectionne deux joueurs du classement qui n'ont pas encore joué ensemble
+    dans le round actuel. Ne modifie pas directement matches_played_round.
+    """
+
+    # Pas assez de joueurs pour créer un match
+    if len(classement_after_round) < 2:
+        return None
+
+    # Parcourt tous les joueurs possibles pour trouver une paire valide
+    for i in range(len(classement_after_round)):
+        premier_du_classement = classement_after_round[i]
+        for j in range(i + 1, len(classement_after_round)):
+            deuxieme_meilleur = classement_after_round[j]
+
+            # Clé de la paire (ordre neutre)
+            match_key = tuple(sorted((premier_du_classement.id, deuxieme_meilleur.id)))
+
+            # Vérifie si la paire n'a jamais joué dans ce round
+            if match_key not in matches_played_round:
+                # Renvoie simplement le match sans modifier les listes externes
+                return Match(players=[premier_du_classement, deuxieme_meilleur], score=[0, 0])
+
+    # Si aucune paire valide trouvée
+    return None
+
+
 
 
 

@@ -1,4 +1,4 @@
-from controllers.controller_tournament import serializer_tournament
+
 
 class Tournament:
     def __init__(self, name_of_tournament, place, date_of_start, date_of_end, actual_round, list_of_round, list_player_saved, description):

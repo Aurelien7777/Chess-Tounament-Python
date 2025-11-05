@@ -22,5 +22,5 @@ def ask_player_creation():
 #AFFICHAGE DU MENU
 def display_menu():
     print("Bienvenue dans le menu principal de l'outil de gestion des tournois d'échecs.\n")
-    menu_choice = int(input(f"1 - Créer joueur \n2 - Créer match \n3 - Créer tournoi \nEntrer votre choix: "))
+    menu_choice = int(input(f"1 - Créer joueur \n2 - Créer match \n3 - Créer tournoi \n4 - Reprendre un tournoi \nEntrer votre choix: "))
     return menu_choice

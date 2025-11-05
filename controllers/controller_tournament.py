@@ -16,8 +16,18 @@ def create_tournament():
     date_of_end = display_date_of_end()
     description = display_description()
     actual_round = ""
-    tournament = Tournament(name_of_tournament=name_of_tournament,place=place,date_of_start=date_of_start,date_of_end=date_of_end,
-                            description=description, actual_round=actual_round, list_of_round=[], list_player_saved=[]) 
+    
+    tournament = Tournament(
+        name_of_tournament=name_of_tournament,
+        place=place,
+        date_of_start=date_of_start,
+        date_of_end=date_of_end,
+        description=description, 
+        actual_round=actual_round, 
+        list_of_round=[], 
+        list_player_saved=[]
+        ) 
+    
     return tournament
 
 def serializer_tournament(obj):
@@ -36,9 +46,23 @@ def serializer_tournament(obj):
             
         def match_to_dict(match):
             return {
-                "Joueurs": [player_to_dict(p) for p in match.players],
-                "Score": match.score,
-            }
+                "Joueurs": [
+                    {
+                "name": match.players[0].name,
+                "last_name": match.players[0].last_name,
+                "id": match.players[0].id,
+                # "score": match.players[0].score
+                        },
+                {
+                "name": match.players[1].name,
+                "last_name": match.players[1].last_name,
+                "id": match.players[1].id,
+                # "score": match.players[1].score
+                    },
+                
+                    ],
+                "Score": match.score
+                    }
                 
         def round_to_dict(round_obj):
             return {
@@ -84,7 +108,7 @@ def save_data(data_tournament, data_base_tournament):
         print(f"Sauvegarde des données du tournoi: {data['Nom du tournoi']}")
         
     else:
-        # db.update({"Liste des joueurs": data["Liste des joueurs"]}, request_data_tournament)
+        db.update({"Liste des joueurs": data["Liste des joueurs"]}, request_data_tournament)
         db.update({"Informations des tours": data["Informations des tours"]}, request_data_tournament)
         db.update({"Description": data["Description"]}, request_data_tournament)
         db.update({"Lieu du tournoi": data["Lieu du tournoi"]}, request_data_tournament)
@@ -98,11 +122,29 @@ def save_data(data_tournament, data_base_tournament):
 
 
 
+def charger_tournoi_par_nom(data_base_tournament_path, nom_tournoi):
+    db = TinyDB(data_base_tournament_path, storage=JSONStorage, ensure_ascii=False, indent=2, encoding="utf-8")
+    object_request_tournoi = Query()
+    request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == nom_tournoi)
+    db.close()
+    if not request_tournoi:
+        return None
 
-#CREATION DU DOSSIER DATA/TOURNAMENT
-def data_tournament_folder_creation():
-    os.makedirs("DATA_TOURNAMENT", exist_ok=True)
-    print("Création du dossier DATA TOURNAMENT effectué")
+    # base Tournament (listes vides, on remplit après)
+    tournoi = Tournament(
+        name_of_tournament=request_tournoi["Nom du tournoi"],
+        place=request_tournoi["Lieu du tournoi"],
+        date_of_start=request_tournoi["Date de début du tournoi"],
+        date_of_end=request_tournoi["Date de fin du tournoi"],
+        description=request_tournoi["Description"],
+        actual_round="", 
+        list_of_round=[],
+        list_player_saved=[],
+    )
+    tournoi.number_of_round = request_tournoi["Nombre de round"]
+    return tournoi, request_tournoi# = request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == nom_tournoi)
+    
+
     
 
 
