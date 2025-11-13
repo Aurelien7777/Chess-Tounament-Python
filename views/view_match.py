@@ -1,6 +1,8 @@
 
 
-#CREATION MATCH
+#===================================
+# GESTION DES MATCHS
+##===================================
 def display_players():
     players = []
     print("Les joueurs participants au match sont ")
@@ -12,5 +14,22 @@ def display_score():
     return score
 
 def display_player_add_to_match(list_player, random_choice_player):
-    print(f"Le joueur {list_player[random_choice_player]} a été ajouté au match")
-    #print(f"Le joueur {list_player[random_choice_player]} a été ajouté au match")
+    return print(f"Le joueur {list_player[random_choice_player]} a été ajouté au match")
+
+
+
+
+#===================================
+# GESTION DES RESULTATS DES MATCHS
+#===================================
+
+def display_result_of_match():
+    print("Entrée invalide. Veuillez entrer 0, 1 ou 2.\n")
+    
+def display_classement_final(compteur, player_classement_final):   
+    print(f"No.{compteur}   {player_classement_final.name} {player_classement_final.last_name} score : {player_classement_final.score} ID : {player_classement_final.id}")
+    
+
+def display_white_player(list_match_player, player_start):
+    print(f"Le joueur jouant en blanc est {list_match_player[player_start].name } {list_match_player[player_start].last_name }")
+    

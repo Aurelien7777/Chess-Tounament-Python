@@ -28,24 +28,31 @@ def serializer_round(obj):
 
 
 def reconstruire_rounds(name_tournament, joueurs_par_id):
-    rounds = []
+    """Reconstruit les rounds à partir des données JSON du tournoi et du dictionnaire des joueurs par ID."""
+    
+    rounds = [] # liste pour stocker les rounds reconstruits
     for round_tournoi in name_tournament["Informations des tours"]:
+        # reconstruction du round avec le nom, la date de début et la date de fin
         r = Round(matchs=[], name_round=round_tournoi["Nom du round"],
-                date_of_start=round_tournoi["Date de début"], date_of_end=round_tournoi["Date de fin"])
+                date_of_start=round_tournoi["Date de début"], date_of_end=round_tournoi["Date de fin"]) 
         
-        for match_tournoi in round_tournoi["Matchs"]:
-            joueur_0_id = match_tournoi["Joueurs"][0]["id"]
+        for match_tournoi in round_tournoi["Matchs"]: # parcourir les matchs du round
+            joueur_0_id = match_tournoi["Joueurs"][0]["id"] 
             joueur_1_id = match_tournoi["Joueurs"][1]["id"]
             
             joueur_0 = joueurs_par_id[joueur_0_id]
             joueur_1 = joueurs_par_id[joueur_1_id]
-            match = Match(players=[joueur_0, joueur_1], score=match_tournoi["Score"])  # Score = [1,0] etc.
-            r.matchs.append(match)
-        rounds.append(r)
-    return rounds
+            
+            # reconstruction du match avec les joueurs et le score
+            match = Match(players=[joueur_0, joueur_1], score=match_tournoi["Score"]) 
+            r.matchs.append(match) # ajouter le match reconstruit au round
+        rounds.append(r) # ajouter le round reconstruit à la liste des rounds
+    return rounds # retourner la liste des rounds reconstruits
 
 
 def reconstruire_matches_played(rounds):
+    """Reconstruit la liste des matchs déjà joués à partir des rounds."""
+    
     match_deja_joue = []
     for round in rounds:
         for match in round.matchs:
@@ -53,7 +60,8 @@ def reconstruire_matches_played(rounds):
             id_joueur2 = match.players[1].id
             
             # normaliser l’ordre pour éviter les doublons inversés
-            pair = (id_joueur1, id_joueur2) if id_joueur1 < id_joueur2 else (id_joueur2, id_joueur1)
+            # si id_joueur1 < id_joueur2 alors pair = (id_joueur1, id_joueur2) sinon pair = (id_joueur2, id_joueur1)
+            pair = (id_joueur1, id_joueur2) if id_joueur1 < id_joueur2 else (id_joueur2, id_joueur1) 
             if pair not in match_deja_joue:
                 match_deja_joue.append(pair)
-    return match_deja_joue
+    return match_deja_joue # retourner la liste des paires de joueurs déjà joués

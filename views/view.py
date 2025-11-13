@@ -1,26 +1,52 @@
+#====================================
 #CREATION DE JOUEUR
+#====================================
 def display_name() -> str:
-    name = input("Entrer le nom du joueur: ")
-    return name
+    return input("Entrer le nom du joueur: ")
 
 def display_lastname() -> str:
-    prenom = input("Entrer le prenom du joueur: ")
-    return prenom
+    return input("Entrer le prenom du joueur: ")
 
 def display_date_of_birth() -> str:
-    date_of_birth = input("Entrer la date de naissance du joueur: ")
-    return date_of_birth
+    return input("Entrer la date de naissance du joueur: ")
 
 def display_created_player(last_name, name):
     print(f"Création du joueur {last_name} {name} réussie")
     
 def ask_player_creation():
-    response = input("Voulez-vous créer un nouveau joueur? Oui ou Non: ")
-    return response
+    return input("Voulez-vous créer un nouveau joueur? Oui ou Non: ")
 
 
+#====================================
 #AFFICHAGE DU MENU
+#====================================
 def display_menu():
     print("Bienvenue dans le menu principal de l'outil de gestion des tournois d'échecs.\n")
-    menu_choice = int(input(f"1 - Créer joueur \n2 - Créer match \n3 - Créer tournoi \n4 - Reprendre un tournoi \nEntrer votre choix: "))
-    return menu_choice
+    return  int(input("1 - Créer joueur \n2 - Créer match \n3 - Créer tournoi \n4 - Reprendre un tournoi \n5 - Générer un rapport \nEntrer votre choix: "))
+
+def display_error_invalid_menu_choice():
+    print("ERREUR: Le choix doit être chiffre entre 1 et 5")
+
+
+
+
+#====================================
+#AFFICHAGE DES MESSAGES DE CONFIRMATION ET D'ERREUR
+#====================================
+def display_save_player(player):
+    print(f"\nSauvegarde du joueur {player.name} {player.last_name} effectuée")
+
+def display_player_already_exists():
+    print("Le joueur est déjà présent dans la base de donnée")
+    
+def display_updated_score(joueur):
+    print(f"Score mis à jour pour {joueur.name} {joueur.last_name} : {joueur.score}")
+
+def display_player_not_found(joueur):
+    print(f"{joueur.name} {joueur.last_name} introuvable : pas de mise à jour")
+    
+    
+
+
+def display_error_invalid_response():
+    print("ERREUR: La réponse ne peut être que Oui ou Non")

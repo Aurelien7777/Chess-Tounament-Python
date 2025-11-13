@@ -1,5 +1,5 @@
 import random
-from views.view_match import display_score, display_players, display_player_add_to_match
+from views.view_match import display_score, display_players, display_player_add_to_match, display_result_of_match, display_classement_final, display_white_player
 from models.model_match import Match
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
@@ -33,46 +33,10 @@ def create_match(list_player, matches_played):
             return create_match(list_player, matches_played)
         else:
             matches_played.append(match_key)
-            return Match(players=list_match_player, score=[0, 0])   # ✅ retour ajouté
+            return Match(players=list_match_player, score=[0, 0])   # retour ajouté
 
     else:
         return None
-
-
-        
-"""def match_after_first_round(classement_after_round, matches_played_round):
-
-    # Pas assez de joueurs
-    if len(classement_after_round) < 2:
-        return None
-
-    # On prend le meilleur disponible (index 0)
-    premier_du_classement = classement_after_round[0]
-
-    # On cherche le meilleur partenaire possible (index 1, puis 2, etc.)
-    index_de_recherche_du_deuxieme_meilleur = 1
-    
-    while index_de_recherche_du_deuxieme_meilleur < len(classement_after_round):
-        deuxieme_meilleur = classement_after_round[index_de_recherche_du_deuxieme_meilleur]
-        match = tuple(sorted((premier_du_classement.id, deuxieme_meilleur.id)))
-    
-        # Si la paire n'a jamais joué, on VALIDE et on enlève les deux
-        if match not in matches_played_round:
-            # on verrouille la paire pour CE round
-            matches_played_round.append(match)
-
-            # on retire les deux joueurs du classement pour ce round
-            classement_after_round.pop(index_de_recherche_du_deuxieme_meilleur)
-            classement_after_round.pop(0)
-
-            return Match(players=[premier_du_classement, deuxieme_meilleur], score=[0, 0])
-
-        # Sinon, on tente le suivant
-        index_de_recherche_du_deuxieme_meilleur += 1
-
-    # Si le premier du classement n’a aucun partenaire disponible (tous déjà joués), on l’enlève et on retente
-    classement_after_round.pop(0)
-    return match_after_first_round(classement_after_round, matches_played_round)"""
 
 
 
@@ -89,7 +53,7 @@ def match_after_first_round(classement_after_round, matches_played_round):
     # Parcourt tous les joueurs possibles pour trouver une paire valide
     for i in range(len(classement_after_round)):
         premier_du_classement = classement_after_round[i]
-        for j in range(i + 1, len(classement_after_round)):
+        for j in range(i + 1, len(classement_after_round)): #Je prends le joueur suivant dans le classement
             deuxieme_meilleur = classement_after_round[j]
 
             # Clé de la paire (ordre neutre)
@@ -97,9 +61,11 @@ def match_after_first_round(classement_after_round, matches_played_round):
 
             # Vérifie si la paire n'a jamais joué dans ce round
             if match_key not in matches_played_round:
-                # Renvoie simplement le match sans modifier les listes externes
-                return Match(players=[premier_du_classement, deuxieme_meilleur], score=[0, 0])
-
+                matches_played_round.append(match_key)
+                classement_after_round.remove(premier_du_classement)
+                classement_after_round.remove(deuxieme_meilleur)
+                return Match(players=[premier_du_classement, deuxieme_meilleur], score=[0, 0])   # retour ajouté
+    
     # Si aucune paire valide trouvée
     return None
 
@@ -112,20 +78,20 @@ def match_after_first_round(classement_after_round, matches_played_round):
 #GESTION DES RESULTATS DES MATCHS 
 def manage_winner_match_bis(list_match_player):
     
+    try:
     # winner = random.randint(0, 2)
-    winner = int(input("Le vainqueur du match est: "))
-    # print("Le chiffre choisi est:", winner)
-    print()
+        winner = int(input("Le vainqueur du match est: "))
+    except ValueError:
+        display_result_of_match()
+        return manage_winner_match_bis(list_match_player)
     
     if winner == 0: #Si le chiffre choisi est inférieur à 1 soit est égal à 0 
 
-        # print(f"le perdant est: {list_match_player[1]}\nle gagnant est {list_match_player[0]}")
         list_match_player[0].score += 1
         return list_match_player[winner], list_match_player[1]
     
     elif winner == 1:
 
-        # print(f"le perdant est: {list_match_player[0]}\nle gagnant est {list_match_player[1]}")
         list_match_player[1].score += 1
         return list_match_player[winner], list_match_player[0]
     
@@ -137,8 +103,6 @@ def manage_winner_match_bis(list_match_player):
         
         draw_list.append(list_match_player[0])
         draw_list.append(list_match_player[1])
-        # print("Match nul") #Chaque joueur reçoit 0,5 point si le match se termine par un match nul.
-        print(draw_list)
         return draw_list
 
 
@@ -150,13 +114,12 @@ def classement(winner_list, draw_list, looser_list):
     classement_after_match = []
     for winner in winner_list:
         classement_after_match.append(winner)
-    print()
+
     for draw in draw_list:
         classement_after_match.append(draw)
-    print()
+
     for looser in looser_list:
         classement_after_match.append(looser)
-    print()
 
     #  initialisation score max et score min à partir du 1er joueur si la liste n'est pas vide
     if classement_after_match:
@@ -167,8 +130,8 @@ def classement(winner_list, draw_list, looser_list):
         score_min = 0
 
     itération = 0
-    while itération < len(classement_after_match):
-        player_classement = classement_after_match[itération]
+    while itération < len(classement_after_match): # parcours de la liste des joueurs
+        player_classement = classement_after_match[itération] # Sélection du joueur courant
 
         # mise à jour des score max et min 
         if player_classement.score >= score_max:
@@ -198,10 +161,9 @@ def classement(winner_list, draw_list, looser_list):
                 next_idx += 1
         current_idx += 1
 
-    print()
     compteur = 1
     for player_classement_final in classement_after_match:
-        print(f"No.{compteur}   {player_classement_final.name} {player_classement_final.last_name} score : {player_classement_final.score} ID : {player_classement_final.id}")
+        display_classement_final(compteur, player_classement_final)
         compteur += 1
 
     return classement_after_match
@@ -210,7 +172,7 @@ def classement(winner_list, draw_list, looser_list):
 
 def choice_white_or_black(list_match_player):
     player_start = random.randint(0, 1)
-    print(f"Le joueur jouant en blanc est {list_match_player[player_start].name } {list_match_player[player_start].last_name }")
+    display_white_player(list_match_player, player_start)
     return player_start
 
 
