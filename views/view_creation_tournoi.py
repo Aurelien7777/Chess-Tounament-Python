@@ -2,6 +2,10 @@
 def display_pause_tournament():
     print("Pause du tournoi")
     
+def request_continue_tournament():
+    return input("Voulez-vous continuer le tournoi? (oui/non) :").strip().lower()
+
+    
 #===================================
 # GESTION DES MATCHS
 #===================================
@@ -23,6 +27,14 @@ def display_end_round(tournament, round_obj):
 
 def display_no_match_played_in_this_round():
     print("Aucun match joué dans ce round. Pause du tournoi.")
+    
+def request_number_of_players():
+    """Demande à l'utilisateur le nombre de joueurs participant au tournoi."""
+    
+    return int(input("Combien de joueurs participe au tournoi? ")) # Nombre de joueurs participant au tournoi
+
+def display_finish_tournament(number_of_round):
+    print(f"\n TOURNOI TERMINE ! ({number_of_round} rounds joués)\n")
     
 
 

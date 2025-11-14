@@ -11,7 +11,7 @@ def display_date_of_birth() -> str:
     return input("Entrer la date de naissance du joueur: ")
 
 def display_created_player(last_name, name):
-    print(f"Création du joueur {last_name} {name} réussie")
+    print(f"Création du joueur {last_name} {name} réussie\n")
     
 def ask_player_creation():
     return input("Voulez-vous créer un nouveau joueur? Oui ou Non: ")

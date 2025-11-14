@@ -4,20 +4,40 @@
 import datetime
 
 # Local imports
-from models.model import Player
 from models.model_match import Match
 from models.model_round import Round
 from controllers.controller import charger_joueurs, save_score, joueurs_du_tournoi
 from controllers.controller_tournament import save_data, charger_tournoi_par_nom
-from controllers.controller_match import manage_winner_match_bis, classement, choice_white_or_black
-from controllers.controller_round import reconstruire_rounds, reconstruire_matches_played
-from views.view_reprise_tournoi import display_rebuild_round, display_initialisation_played_pairs, display_pause_tournament, display_no_possible_match, display_end_round, display_no_match_played_in_this_round
-from views.view_reprise_tournoi import display_player_draws, display_player_wins, display_player_loses
-from views.view_reprise_tournoi import display_tournament_finished, display_final_classement, display_player_final_ranking
-from views.view_reprise_tournoi import display_end_of_round, display_classement_apres_round, display_player_ranking_after_round
-from views.view_reprise_tournoi import display_tournament_not_found, display_number_of_match
-from views.view_reprise_tournoi import display_matches_played, display_remaining_matches, display_start_round, display_match_count
-from views.view_reprise_tournoi import display_match_information, display_match_opponent
+from controllers.controller_match import manage_winner_match_bis, choice_white_or_black
+from controllers.controller_round import reconstruire_rounds
+from views.view_reprise_tournoi import (
+    display_rebuild_round,
+    display_initialisation_played_pairs,
+    display_pause_tournament,
+    display_no_possible_match,
+    display_end_round,
+    display_no_match_played_in_this_round,
+    request_name_tournament_resume,
+    display_player_draws,
+    display_player_wins,
+    display_player_loses,
+    display_tournament_finished,
+    display_final_classement,
+    display_player_final_ranking,
+    display_end_of_round,
+    display_classement_apres_round,
+    display_player_ranking_after_round,
+    display_tournament_not_found,
+    display_number_of_match,
+    display_matches_played,
+    display_remaining_matches,
+    display_start_round,
+    display_match_count,
+    display_match_information,
+    display_match_opponent,
+    request_continue_tournament,
+)
+
 
 
 def resume_tournament():
@@ -72,7 +92,7 @@ def resume_tournament():
     def pause_tournoi():
         """Proposer de faire une pause dans le tournoi"""
         
-        ask_for_continue = input("Voulez-vous continuer le tournoi? (oui/non) :").strip().lower()
+        ask_for_continue = request_continue_tournament()
         if ask_for_continue != "oui":
             display_pause_tournament()
             return False
@@ -208,7 +228,7 @@ def resume_tournament():
     # REPRENDRE UN TOURNOI EXISTANT
     #============================================================================
 
-    name_tournament_resume = input("Nom du tournoi à reprendre: ").strip()
+    name_tournament_resume = request_name_tournament_resume()
     loading_tournament = charger_tournoi_par_nom("data_base_tournament.json", name_tournament_resume)
     if not loading_tournament:
         display_tournament_not_found()

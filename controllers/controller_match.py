@@ -1,5 +1,11 @@
 import random
-from views.view_match import display_score, display_players, display_player_add_to_match, display_result_of_match, display_classement_final, display_white_player
+from views.view_match import (
+    display_input_result_of_match_invalid,
+    display_classement_final,
+    display_white_player,
+    choice_winner_match,
+)
+
 from models.model_match import Match
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
@@ -7,6 +13,7 @@ from tinydb.storages import JSONStorage
 
 #CREATION DE MATCH
 def create_match(list_player, matches_played):
+    """Crée un match entre deux joueurs aléatoires n'ayant pas encore joué ensemble."""
     
     list_match_player = [] #Liste des joueurs jouant un match
     
@@ -77,13 +84,16 @@ def match_after_first_round(classement_after_round, matches_played_round):
 
 #GESTION DES RESULTATS DES MATCHS 
 def manage_winner_match_bis(list_match_player):
+    """Gère le résultat d'un match entre deux joueurs."""
     
-    try:
-    # winner = random.randint(0, 2)
-        winner = int(input("Le vainqueur du match est: "))
-    except ValueError:
-        display_result_of_match()
-        return manage_winner_match_bis(list_match_player)
+    winner = -1
+    while winner == -1 or winner > 2:
+        try:
+            winner = choice_winner_match()
+        except ValueError:
+            display_input_result_of_match_invalid()
+            return manage_winner_match_bis(list_match_player)
+    
     
     if winner == 0: #Si le chiffre choisi est inférieur à 1 soit est égal à 0 
 
@@ -110,6 +120,7 @@ def manage_winner_match_bis(list_match_player):
 
 #GESTION DU CLASSEMENT DES JOUEURS
 def classement(winner_list, draw_list, looser_list):
+    """Gère le classement des joueurs après un round."""
     
     classement_after_match = []
     for winner in winner_list:
@@ -171,6 +182,8 @@ def classement(winner_list, draw_list, looser_list):
 
 
 def choice_white_or_black(list_match_player):
+    """Choisit aléatoirement quel joueur joue avec les pièces blanches."""
+    
     player_start = random.randint(0, 1)
     display_white_player(list_match_player, player_start)
     return player_start
@@ -179,6 +192,7 @@ def choice_white_or_black(list_match_player):
 
 def serializer_match(obj):
     """Convertit un objet Python en JSON"""
+    
     if isinstance(obj, Match): # Vérification que l'objet de classe crée "obj" est bien du même type que Tournament
         data_match = {"Matchs": obj.players, 
                         "Score":obj.score}

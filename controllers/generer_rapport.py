@@ -1,13 +1,32 @@
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
+from views.view_report import (
+    display_ask_tournament_name,
+    display_get_tournament_name,
+    display_if_tournament_not_found,
+    display_sorted_players,
+    display_no_players_found,
+    display_introduction_available_players,
+    display_introduction_available_tournaments,
+    display_all_tournaments,
+    display_introduction_tournament_with_date,
+    display_tournament_with_name_and_date,
+    display_introduction_report_rounds_and_matches,
+    display_rounds_and_matches,
+    display_match_info,
+    display_menu_report_choice,
+    display_error_invalid_menu_choice,
+)
+
 
 
 def generate_player_tournament_report(data_base_tournament_path="data_base_tournament.json"):
     """Génère un rapport des joueurs d'un tournoi spécifique triés par nom."""
     
-    name_tournament_resume = input("Nom du tournoi choisi: ").strip()
+    name_tournament_resume = display_get_tournament_name()
+    
     if not name_tournament_resume:
-        print("Le nom du tournoi ne peut pas être vide.")
+        display_ask_tournament_name()
         return
     
     db = TinyDB(data_base_tournament_path, storage=JSONStorage, ensure_ascii=False, indent=2, encoding="utf-8") 
@@ -17,15 +36,13 @@ def generate_player_tournament_report(data_base_tournament_path="data_base_tourn
     request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == name_tournament_resume) 
     
     if request_tournoi is None:
-        print(f"Aucun tournoi trouvé avec le nom '{name_tournament_resume}'.")
+        display_if_tournament_not_found(name_tournament_resume)
         db.close()
         return
-    
-    print("\nVoici la réponse obtenu:")
 
     liste_joueurs_triee = sorted(request_tournoi["Liste des joueurs"], key=lambda name_player: name_player['name'])
     for joueur in liste_joueurs_triee:
-        print(f"Joueur trié: {joueur['name']} {joueur['last_name']}, ID: {joueur['id']}, Score: {joueur['score']}\n")
+        display_sorted_players(joueur)
     
     db.close()
 
@@ -38,17 +55,16 @@ def generate_all_player_report(data_base_players_path="data_base_players.json"):
     
     db = TinyDB(data_base_players_path, storage=JSONStorage, ensure_ascii=False, indent=2, encoding="utf-8") 
     all_players = db.all()
-    print(f"Le type de all_players est: {type(all_players)}")
     
     if not all_players:
-        print("Aucun joueur trouvé dans la base de données.")
+        display_no_players_found()
         db.close()
         return
     
-    print("\nListe des joueurs disponibles:")
+    display_introduction_available_players()
     liste_all_players_triee = sorted(all_players, key=lambda name_player: name_player['name'])
     for joueur in liste_all_players_triee:
-        print(f"- {joueur['name']} {joueur['last_name']}, ID: {joueur['id']}, Score: {joueur['score']}")
+        display_sorted_players(joueur)
     
     db.close()
 
@@ -62,13 +78,13 @@ def generate_tournament_report(data_base_tournament_path="data_base_tournament.j
     all_tournaments = db.all()
     
     if not all_tournaments:
-        print("Aucun tournoi trouvé dans la base de données.")
+        display_if_tournament_not_found()
         db.close()
         return
     
-    print("\nListe des tournois disponibles:")
+    display_introduction_available_tournaments()
     for tournoi in all_tournaments:
-        print(f"- {tournoi['Nom du tournoi']}")
+        display_all_tournaments(tournoi)
     
     db.close()
 
@@ -79,9 +95,9 @@ def generate_tournament_report(data_base_tournament_path="data_base_tournament.j
 def generate_name_and_date_tournament_report(data_base_tournament_path="data_base_tournament.json"):
     """Génère un rapport des noms et dates d'un tournoi'donné."""
     
-    name_tournament = input("Nom du tournoi choisi: ").strip()
+    name_tournament = display_get_tournament_name()
     if not name_tournament:
-        print("Le nom du tournoi ne peut pas être vide.")
+        display_ask_tournament_name()
         return
     
     db = TinyDB(data_base_tournament_path, storage=JSONStorage, ensure_ascii=False, indent=2, encoding="utf-8") 
@@ -91,12 +107,12 @@ def generate_name_and_date_tournament_report(data_base_tournament_path="data_bas
     request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == name_tournament) 
     
     if request_tournoi is None:
-        print(f"Aucun tournoi trouvé avec le nom '{name_tournament}'.")
+        display_if_tournament_not_found(name_tournament)
         db.close()
         return
     
-    print("\nListe d'un tournoi avec nom et date:")
-    print(f"- {request_tournoi['Nom du tournoi']}, Date de début: {request_tournoi['Date de début du tournoi']}, Date de fin: {request_tournoi['Date de fin du tournoi']}")
+    display_introduction_tournament_with_date()
+    display_tournament_with_name_and_date(request_tournoi)
     
     db.close()
 
@@ -105,9 +121,9 @@ def generate_name_and_date_tournament_report(data_base_tournament_path="data_bas
 
 def generate_report_all_rounds_and_all_matches_of_tournament(data_base_tournament_path="data_base_tournament.json"):
     """Génère un rapport de tous les rounds et matchs d'un tournoi donné."""
-    name_tournament = input("Nom du tournoi choisi: ").strip()
+    name_tournament = display_get_tournament_name()
     if not name_tournament:
-        print("Le nom du tournoi ne peut pas être vide.")
+        display_ask_tournament_name()
         return
     
     db = TinyDB(data_base_tournament_path, storage=JSONStorage, ensure_ascii=False, indent=2, encoding="utf-8") 
@@ -117,28 +133,50 @@ def generate_report_all_rounds_and_all_matches_of_tournament(data_base_tournamen
     request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == name_tournament) 
     
     if request_tournoi is None:
-        print(f"Aucun tournoi trouvé avec le nom '{name_tournament}'.")
+        display_if_tournament_not_found(name_tournament)
         db.close()
         return
 
-    print(f"\nRapport des rounds et matchs pour le tournoi '{name_tournament}':")
+    display_introduction_report_rounds_and_matches(name_tournament)
     for round_info in request_tournoi["Informations des tours"]:
-        print(f"\nRound: {round_info['Nom du round']}")
-        print("  Matchs:")
+        display_rounds_and_matches(round_info)
         for match in round_info["Matchs"]:
             player1 = match["Joueurs"][0]
             player2 = match["Joueurs"][1]
             score = match["Score"]
-            print(f"    - {player1['name']} {player1['last_name']} vs {player2['name']} {player2['last_name']} | Score: {score}")
+            display_match_info(player1, player2, score)
+
+
+#======= MENU REPORT =======#
+def menu_report():
+    
+    choice = int(display_menu_report_choice()) # Récupération de la donnée entrée dans la fonction input de la fonction display_menu()
+    if choice > 5 or choice < 1:
+        display_error_invalid_menu_choice()
+        try:
+            choice = int(display_menu_report_choice()) # Conversion en INT 
+        except (ValueError, TypeError, KeyboardInterrupt):
+            display_error_invalid_menu_choice()
+
+    if choice == 1:
+        generate_all_player_report()
+
+    elif choice == 2:
+        generate_tournament_report()
+
+    elif choice == 3:
+        # CREATION DU TOURNOI
+        generate_name_and_date_tournament_report()
+
+    elif choice == 4:
+        # Reprendre un tournoi existant 
+        generate_player_tournament_report()
+        
+    elif choice == 5:
+        generate_report_all_rounds_and_all_matches_of_tournament()
 
 
 
 
 
-
-if __name__ == "__main__":
-    #generate_player_tournament_report()
-    #generate_tournament_report()
-    #generate_all_player_report()
-    #generate_name_and_date_tournament_report()
-    generate_report_all_rounds_and_all_matches_of_tournament()
+    

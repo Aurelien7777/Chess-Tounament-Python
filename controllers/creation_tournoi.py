@@ -1,9 +1,29 @@
-from .controller_tournament import create_tournament, save_data
-from .controller_match import create_match, match_after_first_round, manage_winner_match_bis, classement, choice_white_or_black
-from .controller import create_player, save_players, save_score
-from views.view_creation_tournoi import display_pause_tournament, display_start_round, display_information_round, display_no_possible_match, display_match_information, display_end_round, display_no_match_played_in_this_round, display_classement_apres_round_1, display_classement_apres_round
-from models.model_round import Round
 import datetime
+from .controller_tournament import create_tournament, save_data
+from .controller_match import ( 
+    create_match, 
+    match_after_first_round, 
+    manage_winner_match_bis, 
+    classement, 
+    choice_white_or_black
+    )
+from .controller import create_player, save_players, save_score
+from models.model_round import Round
+from views.view_creation_tournoi import (
+    display_pause_tournament,
+    display_start_round,
+    display_information_round,
+    display_no_possible_match,
+    display_match_information,
+    display_end_round,
+    display_no_match_played_in_this_round,
+    display_classement_apres_round_1,
+    display_classement_apres_round,
+    request_continue_tournament,
+    request_number_of_players,
+    display_finish_tournament,
+)
+
 
 def lancer_creation_tournoi():
     ALL_PLAYERS = [] # Création d'une liste contenant les joueurs crées
@@ -34,7 +54,7 @@ def lancer_creation_tournoi():
             date_of_end=None)
         
     def pause_tournoi():
-        ask_for_continue = input("Voulez-vous continuer le tournoi? (oui/non) :").strip().lower()
+        ask_for_continue = request_continue_tournament()
         if ask_for_continue != "oui":
             display_pause_tournament()
             return False
@@ -76,7 +96,16 @@ def lancer_creation_tournoi():
     #================================
     tournament = creation_objet_tournoi() # Création de l'objet Tournament
     save_data(tournament, "data_base_tournament.json") # Enregistrement des données du tournoi
-    number_player_in_tournamment = int(input("Combien de joueurs participe au tournoi? ")) # Nombre de joueurs participant au tournoi
+    
+    number_player_in_tournamment = -1
+    while number_player_in_tournamment % 2 != 0 or number_player_in_tournamment < 2:
+        try:
+            number_player_in_tournamment = request_number_of_players() # Nombre de joueurs participant au tournoi
+            if number_player_in_tournamment % 2 != 0 or number_player_in_tournamment < 2:
+                raise ValueError("Le nombre de joueurs doit être un nombre pair et supérieur ou égal à 2.")
+        except (ValueError, TypeError):
+            print("Erreur : Veuillez entrer un nombre pair valide supérieur ou égal à 2.")
+
 
     # CREATION DES JOUEURS DU TOURNOI 
     data_base_players = creation_joueurs_tournoi(tournament, number_player_in_tournamment)
@@ -176,13 +205,6 @@ def lancer_creation_tournoi():
     # Enregistrement des données du tournoi
     save_data(tournament, "data_base_tournament.json")
     
-    """# si pause, on sort du choix 3 proprement
-    if pause_tournoi() is False:
-        round_obj.matchs = round_match_list
-        tournament.list_of_round.append(round_obj)
-        save_data(tournament, "data_base_tournament.json")
-        return"""
-    
     
     #================================
     # REALISATION DES MATCHS POUR LES TOURS RESTANTS
@@ -244,9 +266,8 @@ def lancer_creation_tournoi():
     display_classement_apres_round(round_obj)
     classement_after_round = classement(resultat_after_first_round[0], resultat_after_first_round[1], resultat_after_first_round[2])
     save_data(tournament, "data_base_tournament.json")
-    # si pause, on sort du choix 3 proprement
-    if pause_tournoi() is False:
-        return
+    display_finish_tournament(tournament.number_of_round)
+    
 
 if __name__ == "__main__":
     lancer_creation_tournoi()

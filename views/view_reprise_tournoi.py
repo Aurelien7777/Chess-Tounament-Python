@@ -1,22 +1,36 @@
 def display_rebuild_round(rebuilding_rounds):
+    """Indique à l'utilisateur la reprise d'un round incomplet."""
+    
     print(f"\nReprise du {rebuilding_rounds[-1].name_round} (incomplet)")
 
 def display_initialisation_played_pairs():
+    """Indique à l'utilisateur l'initialisation des paires déjà jouées."""
+    
     print("\n Initialisation des paires déjà jouées dans ce round...")
 
 def display_pause_tournament():
+    """Indique à l'utilisateur la pause du tournoi."""
+    
     print("Pause du tournoi")
 
 def display_no_possible_match():
+    """Indique à l'utilisateur qu'aucun match n'est possible dans ce round."""
+    
     print("\n  Aucun match possible dans ce round")
 
 def display_end_round(data_tournament, round_obj):
+    """Indique à l'utilisateur la fin d'un round."""
+    
     print(f"    Fin du {data_tournament.actual_round} à {round_obj.date_and_hour_of_end}")
 
 def display_no_match_played_in_this_round():
+    """Indique à l'utilisateur qu'aucun match n'a été joué dans ce round."""
+    
     print("     Aucun match joué dans ce round. Pause du tournoi.")
 
 def display_player_draws():
+    """Indique à l'utilisateur qu'un match s'est terminé par un match nul."""
+    
     print("   Résultat: Match nul (0.5 - 0.5)")
 
 def display_player_wins(winner):
@@ -66,3 +80,9 @@ def display_match_information(match_after_round):
     
 def display_match_opponent(match_after_round):
     print(f"   contre {match_after_round.players[1].name} {match_after_round.players[1].last_name}")
+    
+def request_name_tournament_resume():
+    return input("Nom du tournoi à reprendre: ").strip()
+
+def request_continue_tournament():
+    return input("Voulez-vous continuer le tournoi? (oui/non) :").strip().lower()

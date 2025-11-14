@@ -23,7 +23,11 @@ def display_player_add_to_match(list_player, random_choice_player):
 # GESTION DES RESULTATS DES MATCHS
 #===================================
 
-def display_result_of_match():
+def choice_winner_match():
+    print("Entrez le numéro du vainqueur du match [0, 1 ou 2].")
+    return int(input("Le vainqueur du match est : "))
+
+def display_input_result_of_match_invalid():
     print("Entrée invalide. Veuillez entrer 0, 1 ou 2.\n")
     
 def display_classement_final(compteur, player_classement_final):   

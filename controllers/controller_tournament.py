@@ -1,7 +1,15 @@
-from views.view import display_name, display_menu, display_lastname, display_date_of_birth, display_created_player
+
 from models.model import Player
 from models.model_tournament import Tournament
-from views.view_tournament import display_name_of_tournament, display_place, display_date_of_start, display_date_of_end, display_description, display_update_tournament, display_save_tournament
+from views.view_tournament import (
+    display_name_of_tournament,
+    display_place,
+    display_date_of_start,
+    display_date_of_end,
+    display_description,
+    display_update_tournament,
+    display_save_tournament,
+)
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
 
@@ -9,11 +17,23 @@ from tinydb.storages import JSONStorage
 def create_tournament():
     """Crée un objet Tournament en demandant les informations à l'utilisateur via des vues."""
     
-    name_of_tournament = display_name_of_tournament()
-    place = display_place()
-    date_of_start = display_date_of_start()
-    date_of_end = display_date_of_end()
-    description = display_description()
+    name_of_tournament = display_name_of_tournament().strip()
+    place = display_place().strip()
+    date_of_start = display_date_of_start().strip()
+    date_of_end = display_date_of_end().strip()
+    description = display_description().strip()
+    
+    while not name_of_tournament or not place or not date_of_start or not date_of_end:
+        print("ERREUR: Le nom, le lieu, la date de début et la date de fin du tournoi ne peuvent pas être vides.")
+        if not name_of_tournament:
+            name_of_tournament = display_name_of_tournament().strip()
+        if not place: 
+            place = display_place().strip()
+        if not date_of_start: 
+            date_of_start = display_date_of_start().strip()
+        if not date_of_end: 
+            date_of_end = display_date_of_end().strip()
+    
     actual_round = ""
     
     tournament = Tournament(
@@ -122,7 +142,7 @@ def save_data(data_tournament, data_base_tournament):
         db.update({"Date de début du tournoi": data["Date de début du tournoi"]}, request_data_tournament)
         db.update({"Date de fin du tournoi": data["Date de fin du tournoi"]}, request_data_tournament)
         db.update({"Nombre de round": data["Nombre de round"]}, request_data_tournament) 
-        display_update_tournament()
+        #display_update_tournament()
         
     db.close()
     return data_base_tournament

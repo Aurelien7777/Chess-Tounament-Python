@@ -1,9 +1,8 @@
 
 from models.model_round import Round
 from models.model_match import Match
-from views.view_round import display_name_round, display_matchs, display_date_of_start, display_date_of_end
+from views.view_round import display_name_round, display_date_of_start, display_date_of_end, display_matchs
 from models.model_tournament import Tournament
-import datetime
 
 def start_round():
     name_round = display_name_round()
@@ -18,6 +17,7 @@ def start_round():
 
 def serializer_round(obj):
     """Convertit un objet Python en JSON"""
+    
     if isinstance(obj, Round): # Vérification que l'objet de classe crée "obj" est bien du même type que Tournament
         data_round = {"Matchs": obj.matchs, 
                         "Nom du tour":obj.name_round, 

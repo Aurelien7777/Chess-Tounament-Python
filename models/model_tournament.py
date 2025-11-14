@@ -2,6 +2,8 @@
 
 class Tournament:
     def __init__(self, name_of_tournament, place, date_of_start, date_of_end, actual_round, list_of_round, list_player_saved, description):
+        """Modèle de données pour un tournoi."""
+        
         self.name_of_tournament = name_of_tournament
         self.place = place
         self.date_of_start = date_of_start
@@ -12,6 +14,4 @@ class Tournament:
         self.list_player_saved = list_player_saved
         self.description = description
         
-    def points_calculation(self):
-        pass
     
