@@ -22,7 +22,9 @@ def create_match(list_player, matches_played):
         if len(list_player) == 0:
             break  # sécurité pour éviter "empty range in randrange"
 
-        random_choice_player = random.randint(0, len(list_player) - 1)  # Choix d'un chiffre aléatoire
+        random_choice_player = random.randint(
+            0, len(list_player) - 1
+        )  # Choix d'un chiffre aléatoire
         chosen_player = list_player[random_choice_player]  # Joueur choisi
 
         if chosen_player not in list_match_player:
@@ -56,7 +58,9 @@ def match_after_first_round(classement_after_round, matches_played_round):
     # Parcourt tous les joueurs possibles pour trouver une paire valide
     for i in range(len(classement_after_round)):
         premier_du_classement = classement_after_round[i]
-        for j in range(i + 1, len(classement_after_round)):  # Je prends le joueur suivant dans le classement
+        for j in range(
+            i + 1, len(classement_after_round)
+        ):  # Je prends le joueur suivant dans le classement
             deuxieme_meilleur = classement_after_round[j]
 
             # Clé de la paire (ordre neutre)
@@ -67,7 +71,9 @@ def match_after_first_round(classement_after_round, matches_played_round):
                 matches_played_round.append(match_key)
                 classement_after_round.remove(premier_du_classement)
                 classement_after_round.remove(deuxieme_meilleur)
-                return Match(players=[premier_du_classement, deuxieme_meilleur], score=[0, 0])  # retour ajouté
+                return Match(
+                    players=[premier_du_classement, deuxieme_meilleur], score=[0, 0]
+                )  # retour ajouté
 
     # Si aucune paire valide trouvée
     return None
@@ -130,7 +136,9 @@ def classement(winner_list, draw_list, looser_list):
 
     itération = 0
     while itération < len(classement_after_match):  # parcours de la liste des joueurs
-        player_classement = classement_after_match[itération]  # Sélection du joueur courant
+        player_classement = classement_after_match[
+            itération
+        ]  # Sélection du joueur courant
 
         # mise à jour des score max et min
         if player_classement.score >= score_max:
@@ -141,7 +149,11 @@ def classement(winner_list, draw_list, looser_list):
         # insertion triée (remontée du joueur si besoin)
         if itération > 0:
             joueur = itération
-            while joueur > 0 and classement_after_match[joueur].score > classement_after_match[joueur - 1].score:
+            while (
+                joueur > 0
+                and classement_after_match[joueur].score
+                > classement_after_match[joueur - 1].score
+            ):
                 temporaire = classement_after_match[joueur - 1]
                 classement_after_match[joueur - 1] = classement_after_match[joueur]
                 classement_after_match[joueur] = temporaire
@@ -154,7 +166,10 @@ def classement(winner_list, draw_list, looser_list):
     while current_idx < len(classement_after_match):
         next_idx = current_idx + 1
         while next_idx < len(classement_after_match):
-            if classement_after_match[next_idx].id == classement_after_match[current_idx].id:
+            if (
+                classement_after_match[next_idx].id
+                == classement_after_match[current_idx].id
+            ):
                 classement_after_match.pop(next_idx)
             else:
                 next_idx += 1
@@ -173,13 +188,15 @@ def choice_white_or_black(list_match_player):
 
     player_start = random.randint(0, 1)
     display_white_player(list_match_player, player_start)
-    return player_start
+    return list_match_player[player_start]
 
 
 def serializer_match(obj):
     """Convertit un objet Python en JSON"""
 
-    if isinstance(obj, Match):  # Vérification que l'objet de classe crée "obj" est bien du même type que Tournament
+    if isinstance(
+        obj, Match
+    ):  # Vérification que l'objet de classe crée "obj" est bien du même type que Tournament
         data_match = {"Matchs": obj.players, "Score": obj.score}
         return data_match
     raise TypeError(f"Type non sérialisable: {type(obj)}")
