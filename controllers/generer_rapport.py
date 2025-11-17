@@ -40,7 +40,9 @@ def generate_player_tournament_report(
     object_request_tournoi = Query()
 
     # db.get va rechercher un tournoi possédant le même nom que celui entré par l'utilisateur
-    request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == name_tournament_resume)
+    request_tournoi = db.get(
+        object_request_tournoi["Nom du tournoi"] == name_tournament_resume
+    )
 
     if request_tournoi is None:
         display_if_tournament_not_found(name_tournament_resume)
@@ -75,7 +77,9 @@ def generate_all_player_report(data_base_players_path="data_base_players.json"):
         return
 
     display_introduction_available_players()
-    liste_all_players_triee = sorted(all_players, key=lambda name_player: name_player["name"])
+    liste_all_players_triee = sorted(
+        all_players, key=lambda name_player: name_player["name"]
+    )
     for joueur in liste_all_players_triee:
         display_sorted_players(joueur)
 
@@ -126,7 +130,9 @@ def generate_name_and_date_tournament_report(
     object_request_tournoi = Query()
 
     # db.get va rechercher un tournoi possédant le même nom que celui entré par l'utilisateur
-    request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == name_tournament)
+    request_tournoi = db.get(
+        object_request_tournoi["Nom du tournoi"] == name_tournament
+    )
 
     if request_tournoi is None:
         display_if_tournament_not_found(name_tournament)
@@ -158,7 +164,9 @@ def generate_report_all_rounds_and_all_matches_of_tournament(
     object_request_tournoi = Query()
 
     # db.get va rechercher un tournoi possédant le même nom que celui entré par l'utilisateur
-    request_tournoi = db.get(object_request_tournoi["Nom du tournoi"] == name_tournament)
+    request_tournoi = db.get(
+        object_request_tournoi["Nom du tournoi"] == name_tournament
+    )
 
     if request_tournoi is None:
         display_if_tournament_not_found(name_tournament)

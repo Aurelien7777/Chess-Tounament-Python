@@ -32,27 +32,31 @@ def lancer_creation_tournoi():
     # FONCTIONS DE CREATION DU TOURNOI
     # ================================
 
-    # CREATION D'UN OBJET "TOURNAMENT"
     def creation_objet_tournoi():
+        """Création de l'objet Tournament"""
+
         return create_tournament()
 
-    # CREATION DES JOUEURS DU TOURNOI
     def creation_joueurs_tournoi(tournament, number_player_in_tournamment):
+        """Création des joueurs du tournoi"""
+
         for _ in range(number_player_in_tournamment):
             player = create_player()
-            ALL_PLAYERS.append(player)  # Enregistrement des joueurs dans la liste des joueurs sauvegardés
+            ALL_PLAYERS.append(
+                player
+            )  # Enregistrement des joueurs dans la liste des joueurs sauvegardés
 
-        tournament.list_player_saved = (
-            ALL_PLAYERS  # Utilisation de la variable de l'objet Tournament / liste des joueurs enregistrés
-        )
-        save_data(tournament, "data_base_tournament.json")  # Enregistrement des données du tournoi
+        tournament.list_player_saved = ALL_PLAYERS
+        save_data(
+            tournament, "data_base_tournament.json"
+        )  # Enregistrement des données du tournoi
         return save_players(
             tournament.list_player_saved, "data_base_players.json"
         )  # Enregistrement des joueurs dans le fichier JSON
 
-    # CREATION DE L'OBJET ROUND
     def creation_objet_round(tour):
-        # Création de l'objet Round
+        """Création de l'objet Round"""
+
         return Round(
             matchs=[],
             name_round=f"Round {tour+1}",
@@ -98,34 +102,46 @@ def lancer_creation_tournoi():
     # CREATION DU TOURNOI
     # ================================
     tournament = creation_objet_tournoi()  # Création de l'objet Tournament
-    save_data(tournament, "data_base_tournament.json")  # Enregistrement des données du tournoi
+    save_data(
+        tournament, "data_base_tournament.json"
+    )  # Enregistrement des données du tournoi
 
     number_player_in_tournamment = -1
     while number_player_in_tournamment % 2 != 0 or number_player_in_tournamment < 2:
         try:
-            number_player_in_tournamment = request_number_of_players()  # Nombre de joueurs participant au tournoi
-            if number_player_in_tournamment % 2 != 0 or number_player_in_tournamment < 2:
-                raise ValueError("Le nombre de joueurs doit être un nombre pair et supérieur ou égal à 2.")
+            number_player_in_tournamment = (
+                request_number_of_players()
+            )  # Nombre de joueurs participant au tournoi
+            if (
+                number_player_in_tournamment % 2 != 0
+                or number_player_in_tournamment < 2
+            ):
+                raise ValueError(
+                    "Le nombre de joueurs doit être un nombre pair et supérieur ou égal à 2."
+                )
         except (ValueError, TypeError):
-            print("Erreur : Veuillez entrer un nombre pair valide supérieur ou égal à 2.")
+            print(
+                "Erreur : Veuillez entrer un nombre pair valide supérieur ou égal à 2."
+            )
 
-    # CREATION DES JOUEURS DU TOURNOI
+    """Création des joueurs du tournoi"""
     creation_joueurs_tournoi(tournament, number_player_in_tournamment)
 
-    # Détermination du nombre de match en fonction du nombre de joueur divisé par 2
+    """Calcul du nombre de matchs par round"""
     number_of_match = len(ALL_PLAYERS)
 
-    # Création d'une liste contenant l'ensemble des matchs par round
+    """Création d'une liste contenant l'ensemble des matchs par round"""
     round_match_list = []
 
-    # Enregistrement des données du tournoi
+    """Enregistrement des données du tournoi"""
     save_data(tournament, "data_base_tournament.json")
 
     # ================================
     # INITIALISATION DU TOURNOI - PREMIER ROUND
     # ================================
     for tour in range(1):
-        # Création de l'objet Round
+        """Création de l'objet Round + Ajout de 1 à l'indicateur "tour"""
+
         round_obj = creation_objet_round(tour)
 
         # Mise à jour du round actuel dans l'objet Tournament
@@ -135,20 +151,14 @@ def lancer_creation_tournoi():
         # Enregistrement des données du tournoi
         save_data(tournament, "data_base_tournament.json")
 
-        # Création d'une copie de la liste des joueurs pour la création des matchs
+        """Création de listes temporaires pour le round"""
         short_lived_list = ALL_PLAYERS.copy()
-
-        # Création d'une liste contenant l'ensemble des matchs par round
         round_match_list = []
-
-        # Liste des matchs joués par round
         matches_played = []
 
-        # Création d'une liste contenant l'ensemble des gagnants des matchs
+        """Création des listes des gagnants, perdants et matchs nuls"""
         winner_list = []
-        # Création d'une liste contenant l'ensemble des joueurs ayant fait match nul
         draw_list = []
-        # Création d'une liste contenant l'ensemble des perdants des matchs
         looser_list = []
 
         # ================================
@@ -163,7 +173,7 @@ def lancer_creation_tournoi():
 
             display_information_round(tournament)
 
-            # Sélection aléatoire de 2 joueurs dans la copie de la liste qui contient tous les joueurs
+            """Création des matchs du premier round"""
             match = create_match(short_lived_list, matches_played)
             if match is None:
                 display_no_possible_match()
@@ -182,13 +192,14 @@ def lancer_creation_tournoi():
             # Enregistrement des données du tournoi
             save_data(tournament, "data_base_tournament.json")
 
-            # GESTION DES GAGNANT/PERDANT/MATCH NUL
-            resultat = gestion_gagnant_perdant(match, tournament, winner_list, draw_list, looser_list)
-            # winner, draw, looser = gestion_gagnant_perdant(match, tournament, winner_list, draw_list, looser_list)
+            """GESTION DES GAGNANT/PERDANT/MATCH NUL"""
+            resultat = gestion_gagnant_perdant(
+                match, tournament, winner_list, draw_list, looser_list
+            )
             # Enregistrement des données du tournoi
             save_data(tournament, "data_base_tournament.json")
 
-        # clôture du round 1
+        """ clôture du round """
         if round_match_list:
             round_obj.matchs = round_match_list
             round_obj.date_and_hour_of_end = datetime.datetime.now()
@@ -199,7 +210,7 @@ def lancer_creation_tournoi():
             display_no_match_played_in_this_round()
             return
 
-    # Etablissement du classement après le premier round
+    """ Etablissement du classement après le premier round"""
     display_classement_apres_round_1()
 
     classement_after_round = classement(resultat[0], resultat[1], resultat[2])
@@ -217,16 +228,19 @@ def lancer_creation_tournoi():
         tournament.actual_round = round_obj.name_round
         display_start_round(round_obj)
 
-        short_lived_list = ALL_PLAYERS.copy()  # Copie de la liste pour la réutiliser dans la création des matchs
-        round_match_list = []  # Création d'une liste contenant l'ensemble des matchs par round
-        matches_played_round = []  # Liste des matchs joués par round
-        winner_list = []  # Création d'une liste contenant l'ensemble des gagnants des matchs
-        draw_list = []  # Création d'une liste contenant l'ensemble des joueurs ayant fait match nul
-        looser_list = []  # Création d'une liste contenant l'ensemble des perdants des matchs
-        classement_after_round_bis = classement_after_round.copy()
+        """Enregistrement des données du tournoi"""
+        short_lived_list = ALL_PLAYERS.copy()
+        round_match_list = []
+        matches_played_round = []
 
+        """Création des listes des gagnants, perdants et matchs nuls"""
+        winner_list = []
+        draw_list = []
+        looser_list = []
+
+        """ LANCEMENT DES MATCHS DES ROUNDS SUIVANTS"""
+        classement_after_round_bis = classement_after_round.copy()
         for _ in range(number_of_match // 2):
-            print(f"nombre de matchs à jouer dans ce round: {number_of_match // 2}\n")
             if pause_tournoi() is False:
                 round_obj.matchs = round_match_list
                 tournament.list_of_round.append(round_obj)
@@ -234,25 +248,27 @@ def lancer_creation_tournoi():
                 return
 
             display_information_round(tournament)
-            # Sélection aléatoire de 2 joueurs dans la copie de la liste "classement_after_round_bis"
-            match_after_round = match_after_first_round(classement_after_round_bis, matches_played_round)
+            """ Sélection aléatoire de 2 joueurs dans la copie de la liste "classement_after_round_bis"""
+            match_after_round = match_after_first_round(
+                classement_after_round_bis, matches_played_round
+            )
             if match_after_round is None:
                 display_no_possible_match()
             else:
-                # Affichage des joueurs du match
+                """Affichage des joueurs du match"""
                 display_match_information(match_after_round)
 
-                # choix des couleurs
+                """ choix des couleurs"""
                 choice_white_or_black(match_after_round.players)
-                # Ajout du match qui vient d'être crée juste au-dessus dans la liste de tous les matchs du round
                 round_match_list.append(match_after_round)
-                save_data(tournament, "data_base_tournament.json")  # Enregistrement des données du tournoi
+                save_data(tournament, "data_base_tournament.json")
 
-                # GESTION DES GAGNANT/PERDANT/MATCH NUL
+                """ GESTION DES GAGNANT/PERDANT/MATCH NUL"""
                 resultat_after_first_round = gestion_gagnant_perdant(
                     match_after_round, tournament, winner_list, draw_list, looser_list
                 )
 
+        """ clôture du round """
         if round_match_list:
             round_obj.matchs = round_match_list
             round_obj.date_and_hour_of_end = datetime.datetime.now()
@@ -263,6 +279,7 @@ def lancer_creation_tournoi():
             display_no_match_played_in_this_round()
             return
 
+    """ Etablissement du classement après le round en cours"""
     display_classement_apres_round(round_obj)
     classement_after_round = classement(
         resultat_after_first_round[0],

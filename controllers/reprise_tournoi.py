@@ -75,7 +75,7 @@ def resume_tournament():
     # ============================================================================
     def create_new_round(current_round_index):
         """Créer un nouveau round"""
-        # construire le nouveau round
+
         return Round(
             matchs=[],
             name_round=f"Round {current_round_index + 1}",
@@ -107,7 +107,7 @@ def resume_tournament():
     ):
         """Mettre à jour le classement et la liste des joueurs disponibles pour le round en cours"""
 
-        already_played = []  # liste des joueurs ayant déjà joué dans CE roundo
+        already_played = []  # liste des joueurs ayant déjà joué dans ce round
         for game_key in matches_played_this_round:
             already_played.append(game_key[0])
             already_played.append(game_key[1])
@@ -159,12 +159,10 @@ def resume_tournament():
             index_de_recherche += 1
         return match_after_round
 
-    # clôture du round si plus de match possible
     def closing_round_if_no_match(round_obj, round_match_list):
         """Clôturer le round si plus de match possible"""
 
         display_no_possible_match()
-        # clôturer le round courant
         if round_match_list:
             round_obj.matchs = round_match_list
             round_obj.date_and_hour_of_end = datetime.datetime.now()
@@ -176,7 +174,6 @@ def resume_tournament():
         save_data(data_tournament, "data_base_tournament.json")
         return
 
-    # gestion du résultat
     def manage_match(match_after_round):
         """Gestion du résultat d'un match"""
 
@@ -194,8 +191,7 @@ def resume_tournament():
         match_after_round.score = [score1, score2]
 
         save_score("data_base_players.json", all_players)
-        # utilisation de key qui permet de trier selon un attribut spécifique déterminé grâce à une fonction lambda.
-        # Fonction lambda qui prend un joueur en entrée et renvoie son score.
+
         classement_after_round = sorted(
             all_players,
             key=lambda player_in_classement: player_in_classement.score,
@@ -254,19 +250,19 @@ def resume_tournament():
         display_tournament_not_found()
         return
 
-    # Charger le tournoi (depuis la base tournois)
+    """ Charger le tournoi (depuis la base tournois)"""
     data_tournament, objet_name_tournament = loading_tournament
 
-    # Charger tous les joueurs (depuis la base joueurs)
+    """ Charger tous les joueurs (depuis la base joueurs)"""
     joueurs_par_id = charger_joueurs("data_base_players.json")
 
-    # Reconstruire les rounds + paires déjà jouées
+    """ Reconstruire les rounds + paires déjà jouées"""
     rebuilding_rounds = reconstruire_rounds(objet_name_tournament, joueurs_par_id)
 
-    # Lister les joueurs de CE tournoi (objets Player)
+    """ Lister les joueurs de CE tournoi (objets Player)"""
     all_players = joueurs_du_tournoi(objet_name_tournament, joueurs_par_id)
 
-    # Réinjecter l'état dans l'objet tournoi
+    """ Réinjecter l'état dans l'objet tournoi"""
     data_tournament.list_of_round = rebuilding_rounds
     number_of_match = len(all_players) // 2
     display_number_of_match(number_of_match)
@@ -275,13 +271,10 @@ def resume_tournament():
     # REPRENDRE UN ROUND COMPLET OU NON
     # =============================================================================
 
-    # Dans le cas où le dernier round est incomplet, on le reprend
+    """Dans le cas où le dernier round est incomplet, on le reprend"""
     while True:
 
-        if (
-            rebuilding_rounds and len(rebuilding_rounds[-1].matchs) < number_of_match
-        ):  # si le nombre de matchs joués dans le dernier round est inférieur au nombre de matchs total prévu.
-            # Vérification effectuée uniquement si rebuilding_rounds n'est pas vide.
+        if rebuilding_rounds and len(rebuilding_rounds[-1].matchs) < number_of_match:
             round_obj, current_round_index, round_match_list = resume_incomplete_round()
             remaining_matches = number_of_match - len(round_match_list)
             display_matches_played(round_match_list, number_of_match)
@@ -298,17 +291,16 @@ def resume_tournament():
         else:
             current_round_index = len(rebuilding_rounds)
             if current_round_index >= data_tournament.number_of_round:
-                # tournoi déjà terminé : on affiche le classement final et on sort
                 verify_tournament_completion()
                 break
 
-            # construire le nouveau round
+            """ construire le nouveau round"""
             round_obj = create_new_round(current_round_index)
-            # mettre à jour le round actuel dans le tournoi
+            """ mettre à jour le round actuel dans le tournoi"""
             data_tournament.actual_round = round_obj.name_round
             display_start_round(round_obj)
 
-            # initialiser les variables du round
+            """ initialiser les variables du round"""
             round_match_list = []
             remaining_matches = number_of_match
             matches_played_this_round = []
@@ -337,33 +329,30 @@ def resume_tournament():
                 classement_disponible, matches_played_this_round
             )
 
-            # clôture du round si plus de match possible
+            """ clôture du round si plus de match possible"""
             if match_after_round is None:
                 closing_round_if_no_match(round_obj, round_match_list)
                 break
 
-            # sinon, gérer le match
+            """ sinon, gérer le match"""
             choice_white_or_black(match_after_round.players)
             round_match_list.append(match_after_round)
 
-            # Afficher le nombre de match en cours
+            """ Afficher le nombre de match en cours"""
             display_match_count(round_match_list, number_of_match)
 
-            # Afficher les informations du match
+            """ Afficher les informations du match"""
             display_match_information(match_after_round)
             display_match_opponent(match_after_round)
 
             classement_after_round = manage_match(match_after_round)
 
-        # Clôture normale si tous les matchs joués
+        """#Clôture normale si tous les matchs joués"""
         if len(round_match_list) == number_of_match:
             closing_round_normal(round_obj, round_match_list)
 
-        # Si tournoi terminé, on sort
+        """# Si tournoi terminé, on sort"""
         if verify_tournament_completion():
             break
-
-        # préparer la prochaine itération
-        # rebuilding_rounds = data_tournament.list_of_round
 
     save_data(data_tournament, "data_base_tournament.json")

@@ -2,23 +2,19 @@ import random
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
 from models.model import Player
-from .controller_match import create_match, manage_winner_match_bis
 from views.view import (
     display_name,
     display_menu,
     display_lastname,
     display_date_of_birth,
     display_created_player,
-    ask_player_creation,
     display_player_already_exists,
     display_updated_score,
     display_player_not_found,
-    display_error_invalid_response,
     display_error_invalid_menu_choice,
 )
 
 
-# CREATION DE JOUEUR
 def create_player():
     """Crée un objet Player en demandant les informations à l'utilisateur via des vues."""
 
@@ -64,17 +60,21 @@ def create_player():
         print("ERREUR: La date de naissance ne peut pas être vide.")
         date_of_birth = display_date_of_birth()
 
-    list_for_id = random.sample(list_letter_for_id, k=2) + random.sample(list_number_for_id, k=5)
+    list_for_id = random.sample(list_letter_for_id, k=2) + random.sample(
+        list_number_for_id, k=5
+    )
     id = "".join(list_for_id)
 
-    player = Player(name=name, date_of_birth=date_of_birth, last_name=last_name, id=id, score=0)
+    player = Player(
+        name=name, date_of_birth=date_of_birth, last_name=last_name, id=id, score=0
+    )
 
     display_created_player(name, last_name)
 
     return player
 
 
-def save_players(players, data_base_players):  # "players" contient la liste des joueurs qui vont être sauvegardés
+def save_players(players, data_base_players):
     """Sauvegarde les joueurs dans une base de données TinyDB au format JSON."""
 
     data_base_players = TinyDB(
@@ -82,14 +82,18 @@ def save_players(players, data_base_players):  # "players" contient la liste des
         storage=JSONStorage,
         ensure_ascii=False,
         indent=2,
-        encoding="utf-8",  # garde les accents
-    )  # indentations sur plusieurs lignes
+        encoding="utf-8",
+    )
 
-    for player in players:  # Itération sur la liste contenant les infos des joueurs
-        if player not in data_base_players.all() and player not in data_base_players.all():
-            data_player = serializer(player)  # Récupération et conversion des infos joueurs au format JSON
+    for player in players:
+        if (
+            player not in data_base_players.all()
+            and player not in data_base_players.all()
+        ):
+            data_player = serializer(
+                player
+            )  # Récupération et conversion des infos joueurs au format JSON
             data_base_players.insert(data_player)
-            # display_save_player(player)
         else:
             display_player_already_exists()
 
@@ -108,7 +112,7 @@ def save_score(data_base_players, players):
     )
     request_player = Query()  # L'objet utilisé pour créer les requêtes
 
-    for joueur in players:  # Parcours chaque joueur du tournoi
+    for joueur in players:
         data_player = serializer(
             joueur
         )  # récupère les données joueurs dont le score actuel (modifié dans manage_winner_match)
@@ -128,11 +132,12 @@ def save_score(data_base_players, players):
     db.close()
 
 
-# CONVERTISSEMENT D'UN OBJET PYTHON EN JSON
 def serializer(obj):
     """Convertit un objet Python en JSON"""
 
-    if isinstance(obj, Player):  # Vérification que l'objet de classe crée "obj" est bien du même type que Player
+    if isinstance(
+        obj, Player
+    ):  # Vérification que l'objet de classe crée "obj" est bien du même type que Player
         data_player = {
             "name": obj.name,
             "last_name": obj.last_name,
@@ -164,11 +169,11 @@ def charger_joueurs(data_base_players_path):
             last_name=info_player["last_name"],
             date_of_birth=info_player["date_of_birth"],
             id=info_player["id"],
-            score=info_player["score"],  # score cumulé
+            score=info_player["score"],
         )
         joueurs[joueur.id] = joueur
     data_base_player.close()
-    return joueurs  # dict id -> Player
+    return joueurs
 
 
 def joueurs_du_tournoi(file_tournament, joueurs_par_id):
@@ -201,40 +206,6 @@ def joueurs_du_tournoi(file_tournament, joueurs_par_id):
 # ====================================
 
 
-def handle_player_creation(all_players):
-    """Gère la création de joueurs en boucle jusqu'à ce que l'utilisateur décide d'arrêter."""
-
-    IsCreation = True
-    while IsCreation:
-        # CREATION JOUEUR
-        player = create_player()
-        all_players.append(player)
-        save_players(all_players)  # CREATION D'UN FICHIER JSON
-
-        # Démarrage de la boucle pour création de joueur
-        response = ask_player_creation()
-        if response.lower() == "oui":
-            try:
-                player = create_player()  # CREATION JOUEUR
-                all_players.append(player)
-                save_players(all_players)  # CREATION D'UN FICHIER JSON
-            except TypeError:
-                display_error_invalid_response()
-        else:
-            IsCreation = False
-
-
-def handle_single_match_creation(all_players):
-    """Gère la création d'un match unique entre deux joueurs."""
-
-    while len(all_players) <= 1:
-        player = create_player()
-        all_players.append(player)
-    else:
-        single_match = create_match(all_players)  # CREATION MATCH
-        manage_winner_match_bis(single_match)
-
-
 def handle_tournament_creation():
     """Gère la création d'un tournoi."""
 
@@ -265,10 +236,8 @@ def handle_report():
 def start_menu():
     """Démarre le menu principal et gère les choix de l'utilisateur."""
 
-    all_players = []  # Création d'une liste contenant les joueurs crées
-
     choice = 0
-    while choice < 1 or choice > 5 or not isinstance(choice, int):
+    while choice < 1 or choice > 3 or not isinstance(choice, int):
         try:
             choice = int(
                 display_menu()
@@ -277,18 +246,13 @@ def start_menu():
             display_error_invalid_menu_choice()
 
     if choice == 1:
-        handle_player_creation(all_players)
-
-    elif choice == 2:
-        handle_single_match_creation(all_players)
-
-    elif choice == 3:
-        # CREATION DU TOURNOI
+        """Créer un nouveau tournoi."""
         handle_tournament_creation()
 
-    elif choice == 4:
-        # Reprendre un tournoi existant
+    elif choice == 2:
+        """Reprendre un tournoi existant."""
         handle_tournament_resume()
 
-    elif choice == 5:
+    elif choice == 3:
+        """Générer des rapports."""
         handle_report()

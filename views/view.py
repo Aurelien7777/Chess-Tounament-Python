@@ -30,18 +30,16 @@ def display_menu():
     )
     return int(
         input(
-            "1 - Créer joueur\n"
-            "2 - Créer match\n"
-            "3 - Créer tournoi\n"
-            "4 - Reprendre un tournoi\n"
-            "5 - Générer un rapport\n"
+            "1 - Créer tournoi\n"
+            "2 - Reprendre un tournoi\n"
+            "3 - Générer un rapport\n"
             "Entrer votre choix: "
         )
     )
 
 
 def display_error_invalid_menu_choice():
-    print("ERREUR: Le choix doit être chiffre entre 1 et 5")
+    print("ERREUR: Le choix doit être chiffre entre 1 et 3")
 
 
 # ====================================
