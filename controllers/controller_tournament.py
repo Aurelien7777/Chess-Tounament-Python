@@ -208,6 +208,3 @@ class TournamentController:
         )
         tournoi.number_of_round = request_tournoi["Nombre de round"]
         return tournoi, request_tournoi
-        # Les données retounrées sont sous forme de dictionnaire et non pas d'objets Tournament, Round, Match ou Player.
-        # C'est ce qu'on appelle une désérialisation. Passer de dictionnaire à des objets.
-        # On retourne request_tournoi pour récupérer les listes imbriquées (list_of_round et list_player_saved).

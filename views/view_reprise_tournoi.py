@@ -46,7 +46,7 @@ class ResultatViewRepriseTournoi:
 
 # ====================================
 # GESTION DE LA REPRISE DU TOURNOI
-##====================================
+# ====================================
 
 
 class TournamentResumeView:

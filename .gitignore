@@ -6,6 +6,7 @@
 /MENTORAT 17 OCTOBRE.txt
 /venv
 /*.pyc
+__pycache__/
 /MENTORAT 10 OCTOBRE.txt
 /data_base_players.json
 /.ruff_cache

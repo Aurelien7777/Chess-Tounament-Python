@@ -78,7 +78,6 @@ class RoundController:
                 id_joueur2 = match.players[1].id
 
                 # normaliser l’ordre pour éviter les doublons inversés
-                # si id_joueur1 < id_joueur2 alors pair = (id_joueur1, id_joueur2) sinon pair = (id_joueur2, id_joueur1)
                 pair = (
                     (id_joueur1, id_joueur2)
                     if id_joueur1 < id_joueur2

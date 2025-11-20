@@ -132,7 +132,7 @@ Les principales dépendances sont :
 - flake8-html
 - tinydb
 
-Si un fichier `requirements.txt` est fourni, les installer avec :
+Un fichier `requirements.txt` est fourni, les installer avec :
 
 ```bash
 pip install -r requirements.txt

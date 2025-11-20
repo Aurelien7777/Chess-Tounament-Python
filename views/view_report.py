@@ -100,7 +100,7 @@ class RoundsAndMatchesViewReport:
     def display_match_info(player1, player2, score):
         """Affiche les informations d'un match."""
         print(
-            f"    - {player1['name']} {player1['last_name']} vs {player2['name']} {player2['last_name']} | Score: {score}"
+            f"- {player1['name']} {player1['last_name']} vs {player2['name']} {player2['last_name']} | Score: {score}"
         )
 
 
