@@ -1,4 +1,4 @@
-from controllers.controller import start_menu
+from controllers.controller import MainController
 
 if __name__ == "__main__":
-    start_menu()
+    MainController.start_menu()

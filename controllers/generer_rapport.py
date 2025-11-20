@@ -1,21 +1,10 @@
 from tinydb import TinyDB, Query
 from tinydb.storages import JSONStorage
 from views.view_report import (
-    display_ask_tournament_name,
-    display_get_tournament_name,
-    display_if_tournament_not_found,
-    display_sorted_players,
-    display_no_players_found,
-    display_introduction_available_players,
-    display_introduction_available_tournaments,
-    display_all_tournaments,
-    display_introduction_tournament_with_date,
-    display_tournament_with_name_and_date,
-    display_introduction_report_rounds_and_matches,
-    display_rounds_and_matches,
-    display_match_info,
-    display_menu_report_choice,
-    display_error_invalid_menu_choice,
+    MenuViewReport,
+    SortedPlayersViewReport,
+    RoundsAndMatchesViewReport,
+    TournamentViewReport,
 )
 
 
@@ -24,10 +13,10 @@ def generate_player_tournament_report(
 ):
     """Génère un rapport des joueurs d'un tournoi spécifique triés par nom."""
 
-    name_tournament_resume = display_get_tournament_name()
+    name_tournament_resume = TournamentViewReport.display_get_tournament_name()
 
     if not name_tournament_resume:
-        display_ask_tournament_name()
+        TournamentViewReport.display_ask_tournament_name()
         return
 
     db = TinyDB(
@@ -45,7 +34,7 @@ def generate_player_tournament_report(
     )
 
     if request_tournoi is None:
-        display_if_tournament_not_found(name_tournament_resume)
+        TournamentViewReport.display_if_tournament_not_found(name_tournament_resume)
         db.close()
         return
 
@@ -54,7 +43,7 @@ def generate_player_tournament_report(
         key=lambda name_player: name_player["name"],
     )
     for joueur in liste_joueurs_triee:
-        display_sorted_players(joueur)
+        SortedPlayersViewReport.display_sorted_players(joueur)
 
     db.close()
 
@@ -72,16 +61,16 @@ def generate_all_player_report(data_base_players_path="data_base_players.json"):
     all_players = db.all()
 
     if not all_players:
-        display_no_players_found()
+        SortedPlayersViewReport.display_no_players_found()
         db.close()
         return
 
-    display_introduction_available_players()
+    SortedPlayersViewReport.display_introduction_available_players()
     liste_all_players_triee = sorted(
         all_players, key=lambda name_player: name_player["name"]
     )
     for joueur in liste_all_players_triee:
-        display_sorted_players(joueur)
+        SortedPlayersViewReport.display_sorted_players(joueur)
 
     db.close()
 
@@ -99,13 +88,13 @@ def generate_tournament_report(data_base_tournament_path="data_base_tournament.j
     all_tournaments = db.all()
 
     if not all_tournaments:
-        display_if_tournament_not_found()
+        TournamentViewReport.display_if_tournament_not_found()
         db.close()
         return
 
-    display_introduction_available_tournaments()
+    TournamentViewReport.display_introduction_available_tournaments()
     for tournoi in all_tournaments:
-        display_all_tournaments(tournoi)
+        TournamentViewReport.display_all_tournaments(tournoi)
 
     db.close()
 
@@ -115,9 +104,9 @@ def generate_name_and_date_tournament_report(
 ):
     """Génère un rapport des noms et dates d'un tournoi'donné."""
 
-    name_tournament = display_get_tournament_name()
+    name_tournament = TournamentViewReport.display_get_tournament_name()
     if not name_tournament:
-        display_ask_tournament_name()
+        TournamentViewReport.display_ask_tournament_name()
         return
 
     db = TinyDB(
@@ -135,12 +124,12 @@ def generate_name_and_date_tournament_report(
     )
 
     if request_tournoi is None:
-        display_if_tournament_not_found(name_tournament)
+        TournamentViewReport.display_if_tournament_not_found(name_tournament)
         db.close()
         return
 
-    display_introduction_tournament_with_date()
-    display_tournament_with_name_and_date(request_tournoi)
+    TournamentViewReport.display_introduction_tournament_with_date()
+    TournamentViewReport.display_tournament_with_name_and_date(request_tournoi)
 
     db.close()
 
@@ -149,9 +138,9 @@ def generate_report_all_rounds_and_all_matches_of_tournament(
     data_base_tournament_path="data_base_tournament.json",
 ):
     """Génère un rapport de tous les rounds et matchs d'un tournoi donné."""
-    name_tournament = display_get_tournament_name()
+    name_tournament = TournamentViewReport.display_get_tournament_name()
     if not name_tournament:
-        display_ask_tournament_name()
+        TournamentViewReport.display_ask_tournament_name()
         return
 
     db = TinyDB(
@@ -169,32 +158,36 @@ def generate_report_all_rounds_and_all_matches_of_tournament(
     )
 
     if request_tournoi is None:
-        display_if_tournament_not_found(name_tournament)
+        TournamentViewReport.display_if_tournament_not_found(name_tournament)
         db.close()
         return
 
-    display_introduction_report_rounds_and_matches(name_tournament)
+    RoundsAndMatchesViewReport.display_introduction_report_rounds_and_matches(
+        name_tournament
+    )
     for round_info in request_tournoi["Informations des tours"]:
-        display_rounds_and_matches(round_info)
+        RoundsAndMatchesViewReport.display_rounds_and_matches(round_info)
         for match in round_info["Matchs"]:
             player1 = match["Joueurs"][0]
             player2 = match["Joueurs"][1]
             score = match["Score"]
-            display_match_info(player1, player2, score)
+            RoundsAndMatchesViewReport.display_match_info(player1, player2, score)
 
 
 # ======= MENU REPORT =======#
 def menu_report():
 
     choice = int(
-        display_menu_report_choice()
+        MenuViewReport.display_menu_report_choice()
     )  # Récupération de la donnée entrée dans la fonction input de la fonction display_menu()
     if choice > 5 or choice < 1:
-        display_error_invalid_menu_choice()
+        MenuViewReport.display_error_invalid_menu_choice()
         try:
-            choice = int(display_menu_report_choice())  # Conversion en INT
+            choice = int(
+                MenuViewReport.display_menu_report_choice()
+            )  # Conversion en INT
         except (ValueError, TypeError, KeyboardInterrupt):
-            display_error_invalid_menu_choice()
+            MenuViewReport.display_error_invalid_menu_choice()
 
     if choice == 1:
         generate_all_player_report()

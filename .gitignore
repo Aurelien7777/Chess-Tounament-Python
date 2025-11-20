@@ -5,7 +5,7 @@
 /MENTORAT 26 SEPTEMBRE.txt
 /MENTORAT 17 OCTOBRE.txt
 /venv
-*.pyc
+/*.pyc
 /MENTORAT 10 OCTOBRE.txt
 /data_base_players.json
 /.ruff_cache
