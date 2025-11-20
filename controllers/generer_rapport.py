@@ -128,7 +128,7 @@ def generate_name_and_date_tournament_report(
         db.close()
         return
 
-    TournamentViewReport.display_introduction_tournament_with_date()
+    TournamentViewReport.display_introduction_tournament_with_date(request_tournoi)
     TournamentViewReport.display_tournament_with_name_and_date(request_tournoi)
 
     db.close()
